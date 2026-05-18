@@ -55,7 +55,7 @@ export default function About() {
         <div className="container about-bio__inner">
           <div className="about-bio__image-col">
             <div className="about-bio__img-frame">
-              <img src="/tabla-teaching.png" alt="Shri Subodh Ranjan Prasad" className="about-bio__img" />
+              <img src="/shivmani-img.jpeg" alt="Shri Subodh Ranjan Prasad" className="about-bio__img" />
               <div className="about-bio__img-ribbon">Tabla Maestro</div>
             </div>
             <div className="about-bio__quick-facts">

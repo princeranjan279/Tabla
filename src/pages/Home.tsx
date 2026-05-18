@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Music2, Star, Users, Award, Clock, ChevronRight, Monitor, MapPin, CheckCircle, Quote, Phone, Play } from 'lucide-react';
 import './Home.css';
@@ -22,14 +23,27 @@ const curricula = [
 ];
 
 export default function Home() {
+  const heroImages = [
+    '/real-hero-2.jpg',
+    '/real-hero.jpg',
+    '/tabla-teaching.png'
+  ];
+  const [currentImg, setCurrentImg] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImg((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <main className="home" id="main-content">
       {/* Hero */}
       <section className="hero" id="hero-section">
-        <div className="hero__bg" style={{ backgroundImage: 'url(/hero-bg.png)' }} />
-        <div className="hero__overlay" />
-        <div className="container hero__content">
-          <div className="hero__badge animate-fade-in-up">
+        <div className="container hero__inner">
+          <div className="hero__content">
+            <div className="hero__badge animate-fade-in-up">
             <Music2 size={14} />
             <span>Bhartiya Nritya Kala Mandir • Patna, Bihar</span>
           </div>
@@ -55,6 +69,27 @@ export default function Home() {
             </div>
             <span>Trusted by 500+ students across India</span>
           </div>
+          </div>
+          <div className="hero__image-wrapper animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            {heroImages.map((src, index) => (
+              <img 
+                key={src}
+                src={src} 
+                alt={`Guruji Subodh Ranjan Prasad teaching Tabla ${index + 1}`} 
+                className={`hero__image slider-img ${index === currentImg ? 'active' : ''}`} 
+              />
+            ))}
+            <div className="hero__slider-dots">
+              {heroImages.map((_, idx) => (
+                <button 
+                  key={idx} 
+                  className={`hero__slider-dot ${idx === currentImg ? 'active' : ''}`}
+                  onClick={() => setCurrentImg(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
         <div className="hero__stats-band">
           <div className="container hero__stats-grid">
@@ -72,7 +107,7 @@ export default function Home() {
       <section className="section home-about" id="about-snippet">
         <div className="container home-about__inner">
           <div className="home-about__img-wrap">
-            <img src="/tabla-teaching.png" alt="Shri Subodh Ranjan Prasad teaching Tabla" className="home-about__img" />
+            <img src="/solo.jpeg" alt="Shri Subodh Ranjan Prasad teaching Tabla" className="home-about__img" />
             <div className="home-about__img-badge"><Award size={15} /><span>Sangeet Praveen</span></div>
           </div>
           <div className="home-about__content">
