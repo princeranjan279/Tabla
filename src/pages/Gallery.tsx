@@ -2,29 +2,29 @@ import { useState } from 'react';
 import { X, ZoomIn } from 'lucide-react';
 import './Gallery.css';
 
-type Category = 'all' | 'performance' | 'teaching' | 'instruments' | 'events';
+type Category = 'all' | 'performance' | 'teaching' | 'awards' | 'events';
 
 const galleryItems = [
-  { id: 'g1', src: '/gallery1.png', title: 'Stage Performance', category: 'performance', desc: 'Classical Tabla performance at a cultural event in Patna' },
-  { id: 'g2', src: '/tabla-teaching.png', title: 'Guru-Shishya Teaching', category: 'teaching', desc: 'Shri Subodh Ranjan Prasad guiding a student in traditional style' },
-  { id: 'g3', src: '/gallery3.png', title: 'Award Ceremony', category: 'events', desc: 'Felicitation at a classical music recognition event' },
-  { id: 'g4', src: '/tabla-instrument.png', title: 'The Sacred Tabla', category: 'instruments', desc: 'A beautifully crafted pair of Tabla – Bayan and Dayan' },
-  { id: 'g5', src: '/hero-bg.png', title: 'Cultural Performance', category: 'performance', desc: 'A captivating Tabla performance at a classical music festival' },
-  { id: 'g6', src: '/tabla-teaching.png', title: 'Group Session', category: 'teaching', desc: 'Interactive group learning session at the Patna studio' },
-  { id: 'g7', src: '/tabla-instrument.png', title: 'Craftsmanship', category: 'instruments', desc: 'Traditional Tabla craftsmanship — the soul of Indian rhythm' },
-  { id: 'g8', src: '/gallery1.png', title: 'Live Recital', category: 'performance', desc: 'An enthralling live Tabla recital at Bhartiya Nritya Kala Mandir' },
-  { id: 'g9', src: '/gallery3.png', title: 'Cultural Festival', category: 'events', desc: 'Annual classical music festival performance in Bihar' },
-  { id: 'g10', src: '/hero-bg.png', title: 'Onstage Mastery', category: 'performance', desc: 'Demonstrating advanced Taal compositions on stage' },
-  { id: 'g11', src: '/tabla-teaching.png', title: 'Private Coaching', category: 'teaching', desc: 'One-on-one personalised Tabla coaching session' },
-  { id: 'g12', src: '/gallery1.png', title: 'Annual Recital', category: 'events', desc: 'Students\' annual performance showcase event' },
+  { id: 'g1', src: '/real-hero-2.jpg', title: 'Solo Performance', category: 'performance', desc: 'Shri Subodh Ranjan Prasad performing solo Tabla at a classical music event' },
+  { id: 'g2', src: '/sangat2.jpeg', title: 'Bhartiya Nritya Kala Mandir Event', category: 'performance', desc: 'Tabla accompaniment at Bhartiya Nritya Kala Mandir, Patna — 2019' },
+  { id: 'g3', src: '/award-img1.jpeg', title: 'Award Ceremony', category: 'awards', desc: 'Receiving award at Shastriya Sangeet Samaroh, Patna' },
+  { id: 'g4', src: '/gov-of-bihar.jpeg', title: 'Governor Felicitation', category: 'events', desc: 'Felicitated by a dignitary at an official cultural programme in Patna' },
+  { id: 'g5', src: '/sangat1.jpeg', title: 'Accompaniment — Iqbal Ahmad Khan', category: 'performance', desc: 'Tabla sangat for renowned vocalist Ustad Iqbal Ahmad Khan Sahab' },
+  { id: 'g6', src: '/solo-varanasi.jpeg', title: 'Solo Varanasi — Kashi Sangeet Sabha', category: 'performance', desc: 'Swatantra Tabla Vadan at Sangeet Sabha, Kashi (Varanasi)' },
+  { id: 'g7', src: '/award-img3.jpeg', title: 'Cultural Recognition', category: 'awards', desc: 'Felicitation at a Kala Sansthan cultural recognition ceremony' },
+  { id: 'g8', src: '/real-hero.jpg', title: 'Teaching Session', category: 'teaching', desc: 'Shri Subodh Ranjan Prasad teaching Tabla in a class session' },
+  { id: 'g9', src: '/gov-house-program.jpeg', title: 'Private Sangeet Programme', category: 'performance', desc: 'Tabla sangat at a private classical music programme' },
+  { id: 'g10', src: '/award-img2.jpeg', title: 'Felicitation Ceremony', category: 'events', desc: 'Being felicitated at a classical arts recognition event' },
+  { id: 'g11', src: '/shivmani-img.jpeg', title: 'With Shivmani Ji', category: 'awards', desc: 'Shri Subodh Ranjan Prasad with celebrated percussionist Shivmani Ji' },
+  { id: 'g12', src: '/solo.jpeg', title: 'Live Recital — Patna', category: 'performance', desc: 'Live Tabla recital at a cultural event in Patna' },
 ];
 
 const categories: { value: Category; label: string }[] = [
   { value: 'all', label: 'All Photos' },
   { value: 'performance', label: 'Performances' },
   { value: 'teaching', label: 'Teaching' },
-  { value: 'instruments', label: 'Instruments' },
-  { value: 'events', label: 'Events' },
+  { value: 'awards', label: 'Awards & Events' },
+  { value: 'events', label: 'Felicitations' },
 ];
 
 export default function Gallery() {

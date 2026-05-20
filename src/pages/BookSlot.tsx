@@ -43,7 +43,7 @@ export default function BookSlot() {
           <h2 className="book-success__title">Booking Confirmed!</h2>
           <p className="book-success__text">Thank you, <strong>{form.name}</strong>! Your {mode} slot request has been received.</p>
           <div className="book-success__details">
-            <div><span>Mode:</span> {mode === 'offline' ? '📍 Offline (In-person)' : '💻 Online (Zoom)'}</div>
+            <div><span>Mode:</span> {mode === 'offline' ? '📍 Offline (In-person)' : '💻 Online (Google Meet)'}</div>
             <div><span>Day:</span> {selectedDay}</div>
             <div><span>Time:</span> {selectedSlot}</div>
             <div><span>Type:</span> {classTypes.find(c => c.value === classType)?.label}</div>
@@ -74,7 +74,7 @@ export default function BookSlot() {
             <MapPin size={18} /> Offline (In-Person)
           </button>
           <button id="btn-online" className={`book-mode-btn${mode === 'online' ? ' active' : ''}`} onClick={() => { setMode('online'); setSelectedSlot(''); }}>
-            <Monitor size={18} /> Online (Zoom/Meet)
+            <Monitor size={18} /> Online (Google Meet)
           </button>
         </div>
 
@@ -86,14 +86,14 @@ export default function BookSlot() {
               <h3 className="book-info__title">{mode === 'offline' ? 'In-Person Classes' : 'Online Classes'}</h3>
               {mode === 'offline' ? (
                 <>
-                  <p className="book-info__desc">Visit Guruji at his residence in Mithapur, Patna, or he can visit your home within Patna.</p>
-                  <div className="book-info__detail"><MapPin size={14} /><span>Mithapur, Patna – 800001, Bihar</span></div>
-                  <div className="book-info__detail"><Clock size={14} /><span>Mon–Sat, 7 AM – 9 PM</span></div>
+                  <p className="book-info__desc">Visit Guruji at his residence in Jakkanpur, Gardanibagh, Patna, or he can visit your home within Patna.</p>
+                  <div className="book-info__detail"><MapPin size={14} /><span>KRIPAL-BHAWAN, South of DVC Chauk, Jakkanpur, Gardanibagh, Patna – 800001, Bihar</span></div>
+                  <div className="book-info__detail"><Clock size={14} /><span>Mon–Sat, 7:00 AM – 8:00 PM</span></div>
                 </>
               ) : (
                 <>
-                  <p className="book-info__desc">Join a live interactive session via Zoom. A meeting link will be shared after confirmation.</p>
-                  <div className="book-info__detail"><Monitor size={14} /><span>Zoom / Google Meet</span></div>
+                  <p className="book-info__desc">Join a live interactive session via Google Meet. A meeting link will be shared after confirmation.</p>
+                  <div className="book-info__detail"><Monitor size={14} /><span>Google Meet</span></div>
                   <div className="book-info__detail"><Clock size={14} /><span>Flexible slots, Pan-India</span></div>
                 </>
               )}
@@ -106,8 +106,8 @@ export default function BookSlot() {
 
             <div className="book-info__contact">
               <p className="book-info__contact-title">Prefer to call directly?</p>
-              <a href="tel:+918409717698" className="btn btn-outline" id="info-call-btn" style={{ justifyContent: 'center' }}>
-                <Phone size={15} /> +91 84097 17698
+              <a href="tel:+919308213436" className="btn btn-outline" id="info-call-btn" style={{ justifyContent: 'center' }}>
+                <Phone size={15} /> +91 93082 13436
               </a>
             </div>
           </aside>

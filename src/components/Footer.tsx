@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Music2, Clock, ExternalLink } from 'lucide-react';
+import { Phone, MapPin, Music2, Clock, ExternalLink } from 'lucide-react';
 import './Footer.css';
 
 export default function Footer() {
@@ -53,7 +53,7 @@ export default function Footer() {
                 'Beginner Tabla',
                 'Intermediate Level',
                 'Advanced Tabla',
-                'Online via Zoom',
+                'Online via Google Meet',
                 'Home Visits (Patna)',
                 'Group Batches',
                 'Private One-on-One',
@@ -70,11 +70,11 @@ export default function Footer() {
             <div className="footer__contact-list">
               <div className="footer__contact-item">
                 <MapPin size={15} className="footer__contact-icon" />
-                <span>Ashiyana More, BMP Rd<br />Near Police Nirman Bhawan<br />Patna, Bihar 800014</span>
+                <span>KRIPAL-BHAWAN, South of DVC Chauk<br />Near Durga Mandir, Jakkanpur<br />Gardanibagh, Patna, Bihar 800001<br /><small>Landmark: Near Pavitra Apartment</small></span>
               </div>
               <div className="footer__contact-item">
                 <Phone size={15} className="footer__contact-icon" />
-                <a href="tel:+918409717698" className="footer__link" id="footer-phone">+91 84097 17698</a>
+                <a href="tel:+919308213436" className="footer__link" id="footer-phone">+91 93082 13436</a>
               </div>
               <div className="footer__contact-item">
                 <Clock size={15} className="footer__contact-icon" />
@@ -82,7 +82,7 @@ export default function Footer() {
               </div>
             </div>
             <a
-              href="https://share.google/eCjdsvyUigWA9nN0r"
+              href="https://share.google/FDotGIjNIqaD1GLYx"
               target="_blank"
               rel="noopener noreferrer"
               className="footer__map-link"

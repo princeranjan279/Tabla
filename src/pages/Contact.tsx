@@ -3,8 +3,9 @@ import { Phone, Mail, MapPin, Clock, MessageSquare, User, Send, CheckCircle, Ext
 import './Contact.css';
 
 const contactInfo = [
-  { icon: <Phone size={22} />, title: 'Phone', lines: ['+91 84097 17698'], link: 'tel:+918409717698', id: 'contact-phone' },
-  { icon: <MapPin size={22} />, title: 'Address', lines: ['Ashiyana More, BMP Rd', 'Near Police Nirman Bhawan, Patna 800014'], link: 'https://share.google/eCjdsvyUigWA9nN0r', id: 'contact-address' },
+  { icon: <Phone size={22} />, title: 'Phone', lines: ['+91 93082 13436'], link: 'tel:+919308213436', id: 'contact-phone' },
+  { icon: <Mail size={22} />, title: 'Email', lines: ['info@tablaclass.com', 'support@tablaclass.com'], link: 'mailto:info@tablaclass.com', id: 'contact-email' },
+  { icon: <MapPin size={22} />, title: 'Address', lines: ['KRIPAL-BHAWAN, South of DVC Chauk', 'Near Durga Mandir, Jakkanpur', 'Gardanibagh, Patna, Bihar 800001', 'Landmark: Near Pavitra Apartment'], link: 'https://maps.google.com/?q=Jakkanpur+Gardanibagh+Patna+800001', id: 'contact-address' },
   { icon: <Clock size={22} />, title: 'Class Hours', lines: ['Mon–Sat: 7:00 AM – 8:00 PM', 'Sunday: By Appointment'], id: 'contact-hours' },
 ];
 
@@ -116,12 +117,12 @@ export default function Contact() {
             <div className="contact-map" id="contact-map">
               <iframe
                 title="Tabla Classes Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3597.5!2d85.1376!3d25.6093!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ed58dce6732867%3A0x4059f39a1ac82f06!2sMithapur%2C%20Patna%2C%20Bihar!5e0!3m2!1sen!2sin!4v1"
+                src="https://maps.google.com/maps?q=Jakkanpur+Gardanibagh+Patna+Bihar+800001&z=15&output=embed"
                 width="100%" height="250" style={{ border: 0, borderRadius: '14px' }}
                 allowFullScreen loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-              <a href="https://share.google/eCjdsvyUigWA9nN0r" target="_blank" rel="noopener noreferrer" className="contact-map__link" id="open-maps-link">
+              <a href="https://maps.google.com/?q=Jakkanpur+Gardanibagh+Patna+800001" target="_blank" rel="noopener noreferrer" className="contact-map__link" id="open-maps-link">
                 <MapPin size={14} /> Open in Google Maps <ExternalLink size={13} />
               </a>
             </div>

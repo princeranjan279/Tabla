@@ -22,12 +22,13 @@ const curricula = [
   { level: 'Advanced', duration: '2+ years', topics: ['Advanced Laykari', 'Solo performance', 'Gharana traditions', 'Exam & competition prep'] },
 ];
 
+const heroImages = [
+  '/real-hero-2.jpg',
+  '/real-hero.jpg',
+  '/sangat2.jpeg'
+];
+
 export default function Home() {
-  const heroImages = [
-    '/real-hero-2.jpg',
-    '/real-hero.jpg',
-    '/tabla-teaching.png'
-  ];
   const [currentImg, setCurrentImg] = useState(0);
 
   useEffect(() => {
@@ -151,8 +152,8 @@ export default function Home() {
           </div>
           <div className="home-formats__grid">
             {[
-              { icon: <MapPin size={28} />, title: 'Offline Classes', subtitle: 'Learn in Person', desc: 'Attend at our Mithapur, Patna centre or opt for convenient home-visit sessions — a traditional guru-shishya experience.', points: ["At Guruji's residence","Student home visits","Group & private batches","Hands-on correction"], id: 'feature-offline' },
-              { icon: <Monitor size={28} />, title: 'Online Classes', subtitle: 'Learn from Anywhere', desc: 'Live sessions via Zoom or Google Meet. Get real-time feedback from Guruji from the comfort of your home anywhere in India.', points: ['Live Zoom / Meet sessions','Session recordings','Digital learning material','Flexible time slots'], id: 'feature-online' },
+              { icon: <MapPin size={28} />, title: 'Offline Classes', subtitle: 'Learn in Person', desc: 'Attend at our Jakkanpur, Gardanibagh, Patna centre or opt for convenient home-visit sessions — a traditional guru-shishya experience.', points: ["At Guruji's residence","Student home visits","Group & private batches","Hands-on correction"], id: 'feature-offline' },
+              { icon: <Monitor size={28} />, title: 'Online Classes', subtitle: 'Learn from Anywhere', desc: 'Live sessions via Google Meet. Get real-time feedback from Guruji from the comfort of your home anywhere in India or abroad.', points: ['Live Google Meet sessions','Session recordings','Digital learning material','Flexible time slots'], id: 'feature-online' },
             ].map(({ icon, title, subtitle, desc, points, id }) => (
               <div className="format-card" key={title} id={id}>
                 <div className="format-card__icon">{icon}</div>
@@ -197,7 +198,7 @@ export default function Home() {
 
       {/* Instrument Banner */}
       <section className="home-instrument" id="instrument-section">
-        <div className="home-instrument__bg" style={{ backgroundImage: 'url(/tabla-instrument.png)' }} />
+        <div className="home-instrument__bg" style={{ backgroundImage: 'url(/solo-varanasi.jpeg)' }} />
         <div className="home-instrument__overlay" />
         <div className="container home-instrument__content">
           <span className="ornament-text" style={{ display: 'block', marginBottom: '0.75rem' }}>The Sacred Art</span>
@@ -250,7 +251,7 @@ export default function Home() {
           </div>
           <div className="home-cta-banner__btns">
             <Link to="/book" className="btn btn-primary" id="cta-banner-book">Enroll Now</Link>
-            <a href="tel:+918409717698" className="btn btn-ghost" id="cta-banner-call"><Phone size={16} /> Call Now</a>
+            <a href="tel:+919308213436" className="btn btn-ghost" id="cta-banner-call"><Phone size={16} /> Call Now</a>
           </div>
         </div>
       </section>

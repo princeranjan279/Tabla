@@ -6,10 +6,10 @@ const keyPoints = [
   { icon: <GraduationCap size={22} />, title: 'Sangeet Praveen', desc: 'Earned the prestigious Sangeet Praveen degree from Allahabad University in 1985 — the highest credential in Hindustani classical music education.' },
   { icon: <Award size={22} />, title: 'Bhartiya Nritya Kala Mandir', desc: 'Served as a Tabla teacher at the renowned Bhartiya Nritya Kala Mandir, Patna — one of Bihar\'s most respected institutions for classical arts.' },
   { icon: <Clock size={22} />, title: '30+ Years of Teaching', desc: 'Over three decades of unbroken dedication to teaching Tabla to students of all ages — from below 10 years to well above 60.' },
-  { icon: <Users size={22} />, title: '500+ Students Trained', desc: 'Hundreds of students have learned under his guidance, many of whom have gone on to perform at state and national level events.' },
+  { icon: <Users size={22} />, title: '500+ Students Trained', desc: 'Hundreds of students have learned under his guidance, many of whom have gone on to perform at state, national, and international level events.' },
   { icon: <Music size={22} />, title: 'Hindustani Classical Expert', desc: 'Deep expertise in Taal, Laykari, Kaida, Rela, and the rhythmic traditions of multiple Gharanas of the Tabla.' },
   { icon: <BookOpen size={22} />, title: 'Holistic Teaching Method', desc: 'Teaching goes beyond strokes — students learn music theory, rhythm mathematics, and the cultural significance of each composition.' },
-  { icon: <Globe size={22} />, title: 'Online & Offline Reach', desc: 'Conducts classes both at his Mithapur, Patna residence and online via Zoom, enabling students across India to learn.' },
+  { icon: <Globe size={22} />, title: 'Online & Offline Reach', desc: 'Conducts classes both at his Jakkanpur, Gardanibagh, Patna residence and online via Google Meet, enabling students across India and abroad to learn.' },
   { icon: <HomeIcon size={22} />, title: 'Home Visits Available', desc: 'Offers personalised home-visit sessions within Patna for students who prefer learning in their own environment.' },
 ];
 
@@ -18,8 +18,9 @@ const timeline = [
   { year: '1990s', event: 'Joined Bhartiya Nritya Kala Mandir, Patna as Tabla Faculty' },
   { year: '2000s', event: 'Expanded teaching to private and group classes across Patna' },
   { year: '2010s', event: 'Trained 300+ students; organised multiple cultural performances' },
-  { year: '2020', event: 'Launched online Tabla classes via Zoom for pan-India learners' },
-  { year: '2024+', event: '500+ students trained; continues teaching at Mithapur, Patna' },
+  { year: '2020', event: 'Launched online Tabla classes via Google Meet for pan-India learners' },
+  { year: '2024', event: '500+ students trained; continues teaching at Gardanibagh, Jakkanpur, Patna' },
+  { year: '2024–26 (Present)', event: 'Tabla Teacher at Delhi Public School, Patna East' },
 ];
 
 const specialties = [
@@ -55,12 +56,12 @@ export default function About() {
         <div className="container about-bio__inner">
           <div className="about-bio__image-col">
             <div className="about-bio__img-frame">
-              <img src="/shivmani-img.jpeg" alt="Shri Subodh Ranjan Prasad" className="about-bio__img" />
+              <img src="/sangat2.jpeg" alt="Shri Subodh Ranjan Prasad" className="about-bio__img" />
               <div className="about-bio__img-ribbon">Tabla Maestro</div>
             </div>
             <div className="about-bio__quick-facts">
               {[
-                { label: 'Location', value: 'Mithapur, Patna – 800001' },
+                { label: 'Location', value: 'Jakkanpur, Gardanibagh, Patna – 800001' },
                 { label: 'Qualification', value: 'Sangeet Praveen (1985)' },
                 { label: 'University', value: 'Allahabad University' },
                 { label: 'Teaching Mode', value: 'Offline, Online, Home Visit' },
@@ -82,7 +83,7 @@ export default function About() {
               <div className="gold-divider gold-divider-left" />
             </div>
             <p className="about-bio__para">
-              Shri Subodh Ranjan Prasad is a distinguished Tabla teacher and performing artist based in Mithapur, Patna, Bihar.
+              Shri Subodh Ranjan Prasad is a distinguished Tabla teacher and performing artist based in Ashiyana More, Patna, Bihar.
               His journey into the world of Indian classical percussion began in his youth, culminating in the prestigious
               <strong> Sangeet Praveen</strong> degree from Allahabad University in 1985 — the highest academic certification
               in Hindustani classical music.
@@ -93,8 +94,8 @@ export default function About() {
               over multiple decades.
             </p>
             <p className="about-bio__para">
-              After retirement from the Kala Mandir, Shri Prasad has continued his mission of spreading classical Tabla education
-              through private classes at his residence, home-visit sessions, and online Zoom classes — making his expertise
+              After retirement from the Kala Mandir, Shri Subodh Ranjan Prasad has continued his mission of spreading classical Tabla education
+              through private classes at his residence, home-visit sessions, and online Google Meet classes — making his expertise
               accessible to learners across India and beyond.
             </p>
             <p className="about-bio__para">
