@@ -11,9 +11,9 @@ const stats = [
 ];
 
 const testimonials = [
-  { name: 'Rahul Kumar', location: 'Patna', text: "Guruji's patience and depth of knowledge is unmatched. I started as a complete beginner and within 6 months I was performing at local events.", rating: 5, id: 'testimonial-1' },
-  { name: 'Priya Sharma', location: 'Delhi (Online)', text: 'The online classes are just as effective as in-person. Guruji\'s teaching style adapts perfectly to the virtual format. Highly recommend!', rating: 5, id: 'testimonial-2' },
-  { name: 'Amit Singh', location: 'Patna', text: 'A true master of his craft. His knowledge of Hindustani music theory paired with practical tabla lessons is extraordinary.', rating: 5, id: 'testimonial-3' },
+  { name: 'Shreeshant sangam', location: 'Student', text: "Subodh guru ji ke pass aane ke baad hme tabla ka acha guidance mila. 😊✨ Or me Subodh guru ji se bhout santusht hu me or v jagha tabla class karne gya me. lakin yaha jo khushi milli apne aap me wo kahi nhi mila.🥰😊 Aap sab v aaye ache se tabla sikhe Apne bhavishya ko Ujjwal banaye", rating: 5, id: 'testimonial-1' },
+  { name: 'Surendra kumar gupta', location: 'Student', text: "बहुत हीं अनुभवी, तबला वादन के मर्मज्ञ गुरु जी हैं। सोलो तबला वादन में तो श्रोता के रूप मे आँखें बन्द कर इनको सुनते समय , कई जगहों पर तो ऐसा लगता है जैसे आप पंडित किशन महाराज जी को सुन रहे हैं। विलक्षण प्रतिभा !", rating: 5, id: 'testimonial-2' },
+  { name: 'Subhash Suman', location: 'Student', text: "Good morning sir 🙏You are such a great personality who always try to give best to their students which you are possessing....", rating: 5, id: 'testimonial-3' },
 ];
 
 const curricula = [
