@@ -8,6 +8,7 @@ const navLinks = [
   { to: '/', label: 'Home', id: 'nav-home' },
   { to: '/about', label: 'About Guruji', id: 'nav-about' },
   { to: '/book', label: 'Book a Slot', id: 'nav-book' },
+  { to: '/my-booking', label: 'My Booking', id: 'nav-my-booking' },
   { to: '/gallery', label: 'Gallery', id: 'nav-gallery' },
   { to: '/contact', label: 'Contact', id: 'nav-contact' },
 ];

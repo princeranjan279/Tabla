@@ -83,7 +83,7 @@ export default function About() {
               <div className="gold-divider gold-divider-left" />
             </div>
             <p className="about-bio__para">
-              Shri Subodh Ranjan Prasad is a distinguished Tabla teacher and performing artist based in Ashiyana More, Patna, Bihar.
+              Shri Subodh Ranjan Prasad is a distinguished Tabla teacher and performing artist based in Gardanibagh, Patna, Bihar.
               His journey into the world of Indian classical percussion began in his youth, culminating in the prestigious
               <strong> Sangeet Praveen</strong> degree from Allahabad University in 1985 — the highest academic certification
               in Hindustani classical music.
@@ -122,7 +122,7 @@ export default function About() {
           </div>
           <div className="expertise__grid">
             {keyPoints.map(({ icon, title, desc }) => (
-              <div className="expertise-card" key={title} id={`expertise-${title.toLowerCase().replace(/\s+/g,'-')}`}>
+              <div className="expertise-card" key={title} id={`expertise-${title.toLowerCase().replace(/\s+/g, '-')}`}>
                 <div className="expertise-card__icon">{icon}</div>
                 <h3 className="expertise-card__title">{title}</h3>
                 <p className="expertise-card__desc">{desc}</p>
@@ -162,7 +162,7 @@ export default function About() {
           </div>
           <div className="specialties__grid">
             {specialties.map(s => (
-              <div className="specialty-tag" key={s} id={`specialty-${s.toLowerCase().replace(/\s+/g,'-')}`}>
+              <div className="specialty-tag" key={s} id={`specialty-${s.toLowerCase().replace(/\s+/g, '-')}`}>
                 <CheckCircle size={15} /> {s}
               </div>
             ))}

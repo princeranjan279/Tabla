@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import emailjs from '@emailjs/browser';
-import { Monitor, MapPin, Clock, Calendar, CheckCircle, ChevronRight, User, Phone, Mail, MessageSquare } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Monitor, MapPin, Clock, Calendar, CheckCircle, ChevronRight, User, Phone, Mail, MessageSquare, Copy } from 'lucide-react';
+import { newBookingRef, saveBookingToRef } from '../services/bookingService';
 import './BookSlot.css';
 
 type Mode = 'offline' | 'online';
@@ -25,48 +27,75 @@ export default function BookSlot() {
   const [selectedSlot, setSelectedSlot] = useState('');
   const [classType, setClassType] = useState('intro');
   const [level, setLevel] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState('');
+  const [submitted, setSubmitted]   = useState(false);
+  const [sending, setSending]       = useState(false);
+  const [sendError, setSendError]   = useState('');
+  const [bookingId, setBookingId]   = useState('');
+  const [copied, setCopied]         = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: '' });
 
   const slots = mode === 'offline' ? offlineSlots : onlineSlots;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
     setSendError('');
 
+    const classLabel = classTypes.find(c => c.value === classType)?.label ?? classType;
+    const modeLabel  = mode === 'offline' ? 'Offline (In-Person)' : 'Online (Google Meet)';
+
     const templateParams = {
       preferred_day:   selectedDay,
       time_slot:       selectedSlot,
-      class_type:      classTypes.find(c => c.value === classType)?.label ?? classType,
+      class_type:      classLabel,
       current_level:   level,
       full_name:       form.name,
       phone_number:    form.phone,
       email_address:   form.email,
       additional_note: form.message || '—',
-      booking_mode:    mode === 'offline' ? 'Offline (In-Person)' : 'Online (Google Meet)',
+      booking_mode:    modeLabel,
     };
 
-    emailjs
-      .send(
-        'service_7p2b5qw',
-        'template_1g7zapp',
-        templateParams,
-        'Uec9wvhT9q0XgmK1T'
-      )
-      .then(
-        () => {
-          setSending(false);
-          setSubmitted(true);
-        },
-        (error) => {
-          setSending(false);
-          setSendError('Failed to send booking. Please try again or call us directly.');
-          console.error('EmailJS error:', error);
-        }
-      );
+    const bookingData = {
+      full_name:       form.name,
+      phone_number:    form.phone,
+      email_address:   form.email,
+      preferred_day:   selectedDay,
+      time_slot:       selectedSlot,
+      booking_mode:    modeLabel,
+      class_type:      classLabel,
+      current_level:   level,
+      additional_note: form.message || '—',
+    };
+
+    // ✨ Pre-generate the Firestore document reference SYNCHRONOUSLY.
+    // This gives us the ID immediately (no network call needed).
+    const bookingRef = newBookingRef();
+    setBookingId(bookingRef.id); // ID is now set BEFORE the success screen renders
+
+    try {
+      // Step 1 — Send email (critical path)
+      await emailjs.send('service_7p2b5qw', 'template_1g7zapp', templateParams, 'Uec9wvhT9q0XgmK1T');
+
+      // Step 2 — Save to Firestore using the pre-generated ref (non-blocking)
+      saveBookingToRef(bookingRef, bookingData)
+        .then(() => console.log('Booking saved to Firestore:', bookingRef.id))
+        .catch(err => console.error('Firestore save failed (non-critical):', err));
+
+      setSending(false);
+      setSubmitted(true);
+    } catch (err) {
+      setSending(false);
+      setSendError('Failed to send booking. Please try again or call us directly.');
+      console.error('EmailJS error:', err);
+    }
+  };
+
+
+  const copyId = () => {
+    navigator.clipboard.writeText(bookingId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (submitted) {
@@ -75,8 +104,21 @@ export default function BookSlot() {
         <div className="book-hero"><div className="book-hero__overlay" /><div className="container book-hero__content"><h1 className="book-hero__title">Book a Slot</h1></div></div>
         <div className="container book-success" id="booking-success">
           <div className="book-success__icon"><CheckCircle size={56} /></div>
-          <h2 className="book-success__title">Booking Confirmed!</h2>
+          <h2 className="book-success__title">Booking Submitted!</h2>
           <p className="book-success__text">Thank you, <strong>{form.name}</strong>! Your {mode} slot request has been received.</p>
+
+          {/* Booking ID card */}
+          <div className="book-success__id-card">
+            <p className="book-success__id-label">Your Booking ID</p>
+            <div className="book-success__id-row">
+              <span className="book-success__id">{bookingId}</span>
+              <button className="book-success__copy-btn" onClick={copyId} title="Copy Booking ID">
+                <Copy size={15} /> {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <p className="book-success__id-hint">Save this ID or your phone number to track your booking status.</p>
+          </div>
+
           <div className="book-success__details">
             <div><span>Mode:</span> {mode === 'offline' ? '📍 Offline (In-person)' : '💻 Online (Google Meet)'}</div>
             <div><span>Day:</span> {selectedDay}</div>
@@ -84,7 +126,10 @@ export default function BookSlot() {
             <div><span>Type:</span> {classTypes.find(c => c.value === classType)?.label}</div>
           </div>
           <p className="book-success__note">Shri Subodh Ranjan Prasad will contact you at <strong>{form.phone}</strong> within 24 hours to confirm.</p>
-          <button className="btn btn-primary" id="book-again-btn" onClick={() => { setSubmitted(false); setStep(1); setSelectedDay(''); setSelectedSlot(''); }}>Book Another Slot</button>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '1.5rem' }}>
+            <Link to="/my-booking" className="btn btn-primary" id="view-booking-btn">Track My Booking →</Link>
+            <button className="btn btn-outline" id="book-again-btn" onClick={() => { setSubmitted(false); setStep(1); setSelectedDay(''); setSelectedSlot(''); setBookingId(''); }}>Book Another Slot</button>
+          </div>
         </div>
       </main>
     );

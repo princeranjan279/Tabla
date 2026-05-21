@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Bookings collection:
+    // - Anyone (public) can CREATE a booking (for the booking form)
+    // - Only logged-in admin can READ, UPDATE, DELETE
+    match /bookings/{bookingId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+  }
+}
