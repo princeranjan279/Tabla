@@ -10,7 +10,7 @@ Shri Subodh Ranjan Prasad is a distinguished Tabla teacher and performing artist
 
 He served as a dedicated faculty member at the renowned **Bhartiya Nritya Kala Mandir, Patna** — Bihar's premier institution for classical arts — where he shaped the rhythmic foundations of hundreds of students over multiple decades.
 
-After retirement from the Kala Mandir, Shri Subodh Ranjan Prasad has continued his mission of spreading classical Tabla education through private classes at his residence, home-visit sessions, and online Google Meet classes — making his expertise accessible to learners across India and beyond.
+After retirement from the Kala Mandir, Shri Subodh Ranjan Prasad has continued his mission of spreading classical Tabla education through private classes at his residence, home-visit sessions, and online Google Meet classes — making his expertise accessible to learners across India and beyond. He is currently working as a Tabla Faculty for Class 1 to 10 students at Delhi Public School, Patna East, and also teaches international students, currently conducting online sessions for students in the USA.
 
 His teaching philosophy centres on the **guru-shishya tradition** — building not just technical skill, but a lifelong love for the art. He teaches all age groups, from children below 10 to adults above 60, adapting his method to each student's learning pace and goal.
 

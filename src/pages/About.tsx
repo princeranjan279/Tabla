@@ -96,7 +96,7 @@ export default function About() {
             <p className="about-bio__para">
               After retirement from the Kala Mandir, Shri Subodh Ranjan Prasad has continued his mission of spreading classical Tabla education
               through private classes at his residence, home-visit sessions, and online Google Meet classes — making his expertise
-              accessible to learners across India and beyond.
+              accessible to learners across India and beyond. He is currently working as a Tabla Faculty for Class 1 to 10 students at Delhi Public School, Patna East, and also teaches international students, currently conducting online sessions for students in the USA.
             </p>
             <p className="about-bio__para">
               His teaching philosophy centres on the guru-shishya tradition — building not just technical skill, but a lifelong

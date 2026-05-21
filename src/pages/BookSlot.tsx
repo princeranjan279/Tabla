@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { Monitor, MapPin, Clock, Calendar, CheckCircle, ChevronRight, User, Phone, Mail, MessageSquare } from 'lucide-react';
 import './BookSlot.css';
 
@@ -25,13 +26,47 @@ export default function BookSlot() {
   const [classType, setClassType] = useState('intro');
   const [level, setLevel] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: '' });
 
   const slots = mode === 'offline' ? offlineSlots : onlineSlots;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSending(true);
+    setSendError('');
+
+    const templateParams = {
+      preferred_day:   selectedDay,
+      time_slot:       selectedSlot,
+      class_type:      classTypes.find(c => c.value === classType)?.label ?? classType,
+      current_level:   level,
+      full_name:       form.name,
+      phone_number:    form.phone,
+      email_address:   form.email,
+      additional_note: form.message || '—',
+      booking_mode:    mode === 'offline' ? 'Offline (In-Person)' : 'Online (Google Meet)',
+    };
+
+    emailjs
+      .send(
+        'service_7p2b5qw',
+        'template_1g7zapp',
+        templateParams,
+        'Uec9wvhT9q0XgmK1T'
+      )
+      .then(
+        () => {
+          setSending(false);
+          setSubmitted(true);
+        },
+        (error) => {
+          setSending(false);
+          setSendError('Failed to send booking. Please try again or call us directly.');
+          console.error('EmailJS error:', error);
+        }
+      );
   };
 
   if (submitted) {
@@ -232,10 +267,15 @@ export default function BookSlot() {
                         value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
                     </div>
                   </div>
+
+                  {sendError && (
+                    <p style={{ color: '#e57373', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{sendError}</p>
+                  )}
+
                   <div className="book-step-nav">
-                    <button type="button" id="step3-back-btn" className="btn btn-outline" onClick={() => setStep(2)}>← Back</button>
-                    <button type="submit" id="step3-submit-btn" className="btn btn-primary">
-                      Confirm Booking <ChevronRight size={16} />
+                    <button type="button" id="step3-back-btn" className="btn btn-outline" onClick={() => setStep(2)} disabled={sending}>← Back</button>
+                    <button type="submit" id="step3-submit-btn" className="btn btn-primary" disabled={sending}>
+                      {sending ? 'Sending…' : 'Confirm Booking'} <ChevronRight size={16} />
                     </button>
                   </div>
                 </form>
