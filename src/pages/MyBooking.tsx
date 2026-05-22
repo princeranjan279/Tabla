@@ -111,7 +111,8 @@ export default function MyBooking() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const trimmed = input.trim();
+    if (!trimmed) return;
     setLoading(true);
     setError('');
     setBookings([]);
@@ -119,15 +120,23 @@ export default function MyBooking() {
     try {
       let results: Booking[] = [];
       if (lookupMode === 'phone') {
-        results = await getBookingsByPhone(input.trim());
+        results = await getBookingsByPhone(trimmed);
       } else {
-        const b = await getBookingById(input.trim());
+        const b = await getBookingById(trimmed);
         if (b) results = [b];
       }
       setBookings(results);
       setSearched(true);
-    } catch (err) {
-      setError('Something went wrong. Please check your input and try again.');
+    } catch (err: any) {
+      console.error('Booking search error:', err);
+      if (err?.code === 'permission-denied') {
+        setError('Access denied. Please check your Firestore rules or contact support.');
+      } else if (err?.code === 'not-found') {
+        setBookings([]);
+        setSearched(true);
+      } else {
+        setError('Something went wrong. Please check your input and try again.');
+      }
     }
     setLoading(false);
   };

@@ -3,11 +3,15 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Bookings collection:
-    // - Anyone (public) can CREATE a booking (for the booking form)
-    // - Only logged-in admin can READ, UPDATE, DELETE
+    // - Anyone (public) can CREATE a booking (booking form)
+    // - Anyone (public) can READ (get/list) bookings
+    //   This is needed so users can look up their booking by ID or phone number.
+    //   Individual bookings don't contain highly sensitive data beyond name/phone.
+    // - Only logged-in admin can UPDATE or DELETE
     match /bookings/{bookingId} {
       allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow read: if true;
+      allow update, delete: if request.auth != null;
     }
   }
 }
