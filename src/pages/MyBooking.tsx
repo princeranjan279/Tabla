@@ -6,6 +6,14 @@ import './MyBooking.css';
 
 type LookupMode = 'phone' | 'id';
 
+/** Normalize phone to plain 10-digit string, matching how BookSlot.tsx stores it */
+function normalizePhone(phone: string): string {
+  let p = phone.replace(/[\s\-().]/g, '');
+  if (p.startsWith('+91')) p = p.slice(3);
+  if (p.startsWith('91') && p.length === 12) p = p.slice(2);
+  return p;
+}
+
 const statusConfig = {
   pending:   { label: 'Pending Confirmation', icon: <AlertCircle size={16} />, cls: 'status--pending' },
   confirmed: { label: 'Confirmed',             icon: <CheckCircle size={16} />, cls: 'status--confirmed' },
@@ -120,7 +128,8 @@ export default function MyBooking() {
     try {
       let results: Booking[] = [];
       if (lookupMode === 'phone') {
-        results = await getBookingsByPhone(trimmed);
+        const normalizedPhone = normalizePhone(trimmed);
+        results = await getBookingsByPhone(normalizedPhone);
       } else {
         const b = await getBookingById(trimmed);
         if (b) results = [b];

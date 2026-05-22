@@ -20,6 +20,14 @@ const classTypes = [
 
 const levels = ['Complete Beginner', 'Some Experience', 'Intermediate', 'Advanced'];
 
+/** Normalize phone number: strip spaces, dashes, +91 prefix, keep only digits */
+function normalizePhone(phone: string): string {
+  let p = phone.replace(/[\s\-().]/g, ''); // remove spaces, dashes, dots, parens
+  if (p.startsWith('+91')) p = p.slice(3);
+  if (p.startsWith('91') && p.length === 12) p = p.slice(2);
+  return p; // returns 10-digit string e.g. "9308213436"
+}
+
 export default function BookSlot() {
   const [mode, setMode] = useState<Mode>('offline');
   const [step, setStep] = useState<Step>(1);
@@ -44,13 +52,16 @@ export default function BookSlot() {
     const classLabel = classTypes.find(c => c.value === classType)?.label ?? classType;
     const modeLabel  = mode === 'offline' ? 'Offline (In-Person)' : 'Online (Google Meet)';
 
+    // Normalize phone: always store as plain 10-digit number
+    const normalizedPhone = normalizePhone(form.phone);
+
     const templateParams = {
       preferred_day:   selectedDay,
       time_slot:       selectedSlot,
       class_type:      classLabel,
       current_level:   level,
       full_name:       form.name,
-      phone_number:    form.phone,
+      phone_number:    normalizedPhone,
       email_address:   form.email,
       additional_note: form.message || '—',
       booking_mode:    modeLabel,
@@ -58,7 +69,7 @@ export default function BookSlot() {
 
     const bookingData = {
       full_name:       form.name,
-      phone_number:    form.phone,
+      phone_number:    normalizedPhone,   // stored as normalized 10-digit
       email_address:   form.email,
       preferred_day:   selectedDay,
       time_slot:       selectedSlot,
@@ -68,26 +79,27 @@ export default function BookSlot() {
       additional_note: form.message || '—',
     };
 
-    // ✨ Pre-generate the Firestore document reference SYNCHRONOUSLY.
+    // Pre-generate the Firestore document reference SYNCHRONOUSLY.
     // This gives us the ID immediately (no network call needed).
     const bookingRef = newBookingRef();
     setBookingId(bookingRef.id); // ID is now set BEFORE the success screen renders
 
     try {
-      // Step 1 — Send email (critical path)
-      await emailjs.send('service_7p2b5qw', 'template_1g7zapp', templateParams, 'Uec9wvhT9q0XgmK1T');
+      // Step 1 — Save to Firestore FIRST (most important — must not be lost)
+      await saveBookingToRef(bookingRef, bookingData);
+      console.log('✅ Booking saved to Firestore:', bookingRef.id);
 
-      // Step 2 — Save to Firestore using the pre-generated ref (non-blocking)
-      saveBookingToRef(bookingRef, bookingData)
-        .then(() => console.log('Booking saved to Firestore:', bookingRef.id))
-        .catch(err => console.error('Firestore save failed (non-critical):', err));
+      // Step 2 — Send email notification (non-blocking, failure is OK)
+      emailjs.send('service_7p2b5qw', 'template_1g7zapp', templateParams, 'Uec9wvhT9q0XgmK1T')
+        .then(() => console.log('✅ Email sent'))
+        .catch(err => console.warn('⚠️ Email send failed (booking still saved):', err));
 
       setSending(false);
       setSubmitted(true);
     } catch (err) {
       setSending(false);
-      setSendError('Failed to send booking. Please try again or call us directly.');
-      console.error('EmailJS error:', err);
+      setSendError('Failed to save your booking. Please check your connection and try again.');
+      console.error('Firestore save error:', err);
     }
   };
 
@@ -298,7 +310,7 @@ export default function BookSlot() {
                     </div>
                     <div className="form-group">
                       <label className="form-label" htmlFor="input-phone"><Phone size={13} /> Phone Number *</label>
-                      <input id="input-phone" className="form-input" required placeholder="+91 XXXXX XXXXX" type="tel"
+                      <input id="input-phone" className="form-input" required placeholder="10-digit number e.g. 9308213436" type="tel"
                         value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
                     </div>
                     <div className="form-group" style={{ gridColumn: '1 / -1' }}>
@@ -320,7 +332,7 @@ export default function BookSlot() {
                   <div className="book-step-nav">
                     <button type="button" id="step3-back-btn" className="btn btn-outline" onClick={() => setStep(2)} disabled={sending}>← Back</button>
                     <button type="submit" id="step3-submit-btn" className="btn btn-primary" disabled={sending}>
-                      {sending ? 'Sending…' : 'Confirm Booking'} <ChevronRight size={16} />
+                      {sending ? 'Saving…' : 'Confirm Booking'} <ChevronRight size={16} />
                     </button>
                   </div>
                 </form>
