@@ -2,18 +2,18 @@ import { useState } from 'react';
 import { X, ZoomIn } from 'lucide-react';
 import './Gallery.css';
 
-type Category = 'all' | 'performance' | 'teaching' | 'awards' | 'events';
+type Category = 'all' | 'performance' | 'sangat' | 'teaching' | 'awards' | 'events';
 
 const galleryItems = [
   { id: 'g1', src: '/real-hero-2.jpg', title: 'Solo Performance', category: 'performance', desc: 'Shri Subodh Ranjan Prasad performing solo Tabla at a classical music event' },
-  { id: 'g2', src: '/sangat2.jpeg', title: 'Bhartiya Nritya Kala Mandir Event', category: 'performance', desc: 'Tabla accompaniment at Bhartiya Nritya Kala Mandir, Patna — 2019' },
+  { id: 'g2', src: '/sangat2.jpeg', title: 'Bhartiya Nritya Kala Mandir Event', category: 'sangat', desc: 'Tabla sangat at Bhartiya Nritya Kala Mandir, Patna — a classical music programme — 2019' },
   { id: 'g3', src: '/award-img1.jpeg', title: 'Award Ceremony', category: 'awards', desc: 'Receiving award at Shastriya Sangeet Samaroh, Patna' },
   { id: 'g4', src: '/gov-of-bihar.jpeg', title: 'Governor Felicitation', category: 'events', desc: 'Felicitated by a dignitary at an official cultural programme in Patna' },
-  { id: 'g5', src: '/sangat1.jpeg', title: 'Accompaniment — Iqbal Ahmad Khan', category: 'performance', desc: 'Tabla sangat for renowned vocalist Ustad Iqbal Ahmad Khan Sahab' },
+  { id: 'g5', src: '/sangat1.jpeg', title: 'Sangat — Ustad Iqbal Ahmad Khan', category: 'sangat', desc: 'Tabla sangat for renowned vocalist Ustad Iqbal Ahmad Khan Sahab — a hallmark of Guruji\'s accompanist artistry' },
   { id: 'g6', src: '/solo-varanasi.jpeg', title: 'Solo Varanasi — Kashi Sangeet Sabha', category: 'performance', desc: 'Swatantra Tabla Vadan at Sangeet Sabha, Kashi (Varanasi)' },
   { id: 'g7', src: '/award-img3.jpeg', title: 'Cultural Recognition', category: 'awards', desc: 'Felicitation at a Kala Sansthan cultural recognition ceremony' },
   { id: 'g8', src: '/real-hero.jpg', title: 'Teaching Session', category: 'teaching', desc: 'Shri Subodh Ranjan Prasad teaching Tabla in a class session' },
-  { id: 'g9', src: '/gov-house-program.jpeg', title: 'Private Sangeet Programme', category: 'performance', desc: 'Tabla sangat at a private classical music programme' },
+  { id: 'g9', src: '/gov-house-program.jpeg', title: 'Private Sangeet Programme', category: 'sangat', desc: 'Tabla sangat at a private classical music programme — accompanying distinguished instrumentalists and vocalists' },
   { id: 'g10', src: '/award-img2.jpeg', title: 'Felicitation Ceremony', category: 'events', desc: 'Being felicitated at a classical arts recognition event' },
   { id: 'g11', src: '/shivmani-img.jpeg', title: 'With Shivmani Ji', category: 'awards', desc: 'Shri Subodh Ranjan Prasad with celebrated percussionist Shivmani Ji' },
   { id: 'g12', src: '/solo.jpeg', title: 'Live Recital — Patna', category: 'performance', desc: 'Live Tabla recital at a cultural event in Patna' },
@@ -21,9 +21,10 @@ const galleryItems = [
 
 const categories: { value: Category; label: string }[] = [
   { value: 'all', label: 'All Photos' },
-  { value: 'performance', label: 'Performances' },
+  { value: 'performance', label: 'Solo Performances' },
+  { value: 'sangat', label: 'Accompaniment (Sangat)' },
   { value: 'teaching', label: 'Teaching' },
-  { value: 'awards', label: 'Awards & Events' },
+  { value: 'awards', label: 'Awards & Recognition' },
   { value: 'events', label: 'Felicitations' },
 ];
 

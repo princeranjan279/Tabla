@@ -141,6 +141,54 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Dual Role Highlight */}
+      <section className="section home-roles" id="roles-section" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="container">
+          <div className="section-header">
+            <span className="ornament-text">Two Worlds, One Maestro</span>
+            <h2 className="section-title" style={{ marginTop: '0.5rem' }}>Teacher <span className="gradient-text">&</span> Accompanist</h2>
+            <div className="gold-divider" />
+            <p className="section-subtitle">Shri Subodh Ranjan Prasad brings two distinct mastery roles to the world of Hindustani classical music</p>
+          </div>
+          <div className="home-formats__grid">
+            {/* Teacher Role */}
+            <div className="format-card" id="role-teacher">
+              <div className="format-card__icon"><Music2 size={28} /></div>
+              <span className="badge badge-outline format-card__badge">Guru — Shishya Parampara</span>
+              <h3 className="format-card__title">Tabla Teacher</h3>
+              <p className="format-card__desc">
+                With 30+ years of dedicated teaching, Guruji nurtures students from beginner to advanced levels —
+                covering all Taals, Kaida, Rela, Laykari, and classical Gharana traditions.
+              </p>
+              <ul className="format-card__list">
+                {['Beginner to Advanced levels', 'All age groups (below 10 to 60+)', 'Delhi Public School, Patna East', 'Offline, Online & Home Visits'].map(pt => <li key={pt}><CheckCircle size={13} /> {pt}</li>)}
+              </ul>
+              <Link to="/book" className="btn btn-primary format-card__btn" id="role-teacher-btn">
+                Enroll Now <ChevronRight size={16} />
+              </Link>
+            </div>
+
+            {/* Accompanist Role */}
+            <div className="format-card" id="role-accompanist">
+              <div className="format-card__icon"><Star size={28} /></div>
+              <span className="badge badge-outline format-card__badge">Sangat — The Art of Accompaniment</span>
+              <h3 className="format-card__title">Tabla Accompanist</h3>
+              <p className="format-card__desc">
+                A seasoned performing accompanist, Guruji provides Tabla sangat to instrumentalists and vocalists —
+                elevating every performance with precise rhythm and deep musical empathy.
+              </p>
+              <ul className="format-card__list">
+                {['Sitar, Sarod, Violin, Guitar', 'Vocal (Khayal, Thumri, Bhajan)', 'Classical Dance (Kathak & more)', 'Prestigious stages across Bihar & beyond'].map(pt => <li key={pt}><CheckCircle size={13} /> {pt}</li>)}
+              </ul>
+              <Link to="/gallery" className="btn btn-primary format-card__btn" id="role-accompanist-btn">
+                View Gallery <ChevronRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       {/* Class Formats */}
       <section className="section home-formats" id="class-formats">
         <div className="container">

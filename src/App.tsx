@@ -10,6 +10,8 @@ import BookSlot from './pages/BookSlot';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
 import MyBooking from './pages/MyBooking';
+import Learn from './pages/Learn';
+import Practice from './pages/Practice';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import { Toaster } from 'react-hot-toast';
@@ -49,6 +51,8 @@ function AppLayout() {
           <Route path="/about" element={<About />} />
           <Route path="/book" element={<BookSlot />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/learn" element={<Learn />} />
+          <Route path="/practice" element={<Practice />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/my-booking" element={<MyBooking />} />
           <Route path="*" element={<Home />} />

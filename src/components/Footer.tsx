@@ -35,6 +35,8 @@ export default function Footer() {
                 { to: '/', label: 'Home' },
                 { to: '/about', label: 'About Guruji' },
                 { to: '/book', label: 'Book a Slot' },
+                { to: '/learn', label: 'Learn Bols' },
+                { to: '/practice', label: 'Riyaz Studio' },
                 { to: '/gallery', label: 'Gallery' },
                 { to: '/contact', label: 'Contact Us' },
               ].map(({ to, label }) => (
@@ -58,6 +60,7 @@ export default function Footer() {
                 'Group Batches',
                 'Private One-on-One',
                 'Exam Preparation',
+                'Tabla Accompaniment (Sangat)',
               ].map(item => (
                 <li key={item}><span className="footer__link footer__link--text">• {item}</span></li>
               ))}

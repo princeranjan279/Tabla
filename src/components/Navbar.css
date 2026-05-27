@@ -208,3 +208,15 @@
 @media (max-width: 480px) {
   .navbar__logo-sub { display: none; }
 }
+
+/* Highlight Riyaz Studio nav link */
+#nav-practice {
+  color: var(--accent);
+  font-weight: 600;
+}
+#mob-nav-practice {
+  color: var(--accent) !important;
+  font-weight: 600;
+  border-left: 2px solid var(--accent);
+  background: rgba(232, 184, 75, 0.05);
+}

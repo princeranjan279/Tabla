@@ -10,6 +10,8 @@ const navLinks = [
   { to: '/book', label: 'Book a Slot', id: 'nav-book' },
   { to: '/my-booking', label: 'My Booking', id: 'nav-my-booking' },
   { to: '/gallery', label: 'Gallery', id: 'nav-gallery' },
+  { to: '/learn', label: 'Learn Bols', id: 'nav-learn' },
+  { to: '/practice', label: 'Riyaz Studio 🎛', id: 'nav-practice' },
   { to: '/contact', label: 'Contact', id: 'nav-contact' },
 ];
 

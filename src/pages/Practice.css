@@ -1,0 +1,723 @@
+/* ─── Riyaz Studio Console Styles ─── */
+
+.practice-page {
+  background-color: #0b0804;
+  color: #fdf0d5;
+  padding: 3rem 0;
+  min-height: calc(100vh - 80px);
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-body);
+}
+
+/* Subtle background glowing spots */
+.practice-page::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: 20%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(232, 184, 75, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.practice-page::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: 10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(232, 184, 75, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.practice-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Header Section ─── */
+.practice-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.practice-header__tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(232, 184, 75, 0.08);
+  border: 1px solid rgba(232, 184, 75, 0.25);
+  border-radius: 50px;
+}
+
+.practice-header__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.practice-header__subtitle {
+  font-size: 1rem;
+  color: #a08a70;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ─── Main Console Grid ─── */
+.console-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .console-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Console Blocks ─── */
+.console-card {
+  background: linear-gradient(135deg, #18120a 0%, #110c05 100%);
+  border: 1px solid rgba(232, 184, 75, 0.12);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.console-card--accent {
+  border-color: rgba(232, 184, 75, 0.25);
+  box-shadow: 0 10px 40px rgba(232, 184, 75, 0.05);
+}
+
+.console-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #e5c38d;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.console-card__title svg {
+  color: var(--accent);
+}
+
+/* ─── Beat Visualizer Section ─── */
+.visualizer-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+/* Big Ring Visualizer */
+.beat-ring-outer {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #241a0d 0%, #0e0a04 100%);
+  border: 4px solid #20170a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 20px rgba(232, 184, 75, 0.05);
+  margin-bottom: 1.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.beat-ring-outer--sam {
+  border-color: #e8b84b;
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 35px rgba(232, 184, 75, 0.25);
+  transform: scale(1.03);
+}
+
+.beat-ring-outer--beat {
+  border-color: rgba(232, 184, 75, 0.6);
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 25px rgba(232, 184, 75, 0.15);
+  transform: scale(1.015);
+}
+
+.beat-ring-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.beat-display__number {
+  font-size: 3.8rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  font-feature-settings: "tnum";
+}
+
+.beat-ring-outer--sam .beat-display__number {
+  color: #f3d98b;
+  text-shadow: 0 0 15px rgba(243, 217, 139, 0.6);
+}
+
+.beat-display__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #a08a70;
+  margin-top: 0.25rem;
+}
+
+.beat-ring-outer--sam .beat-display__label {
+  color: #e8b84b;
+}
+
+.beat-display__taal {
+  font-size: 0.8rem;
+  color: #e5c38d;
+  background: rgba(232, 184, 75, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(232, 184, 75, 0.15);
+  margin-top: 0.5rem;
+}
+
+/* Linear Beat Counter */
+.linear-beats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.linear-beat {
+  width: 32px;
+  height: 38px;
+  background: #1d150b;
+  border: 1px solid rgba(232, 184, 75, 0.1);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.linear-beat--sam {
+  border-color: rgba(232, 184, 75, 0.35);
+  background: #281a0b;
+}
+
+.linear-beat--khali {
+  border-style: dashed;
+  border-color: rgba(160, 120, 64, 0.3);
+}
+
+.linear-beat__num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8c765c;
+  font-feature-settings: "tnum";
+}
+
+.linear-beat--sam .linear-beat__num {
+  color: #e8b84b;
+}
+
+.linear-beat__marker {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #e8b84b;
+}
+
+.linear-beat--khali .linear-beat__marker {
+  color: #a07840;
+}
+
+.linear-beat--active {
+  background: #e8b84b !important;
+  border-color: #e8b84b !important;
+  box-shadow: 0 0 10px rgba(232, 184, 75, 0.6);
+  transform: translateY(-2px);
+}
+
+.linear-beat--active .linear-beat__num,
+.linear-beat--active .linear-beat__marker {
+  color: #0e0a04 !important;
+}
+
+/* ─── Instrument / Raag / Taal selectors ─── */
+.selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.control-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a08a70;
+  margin-bottom: 0.4rem;
+}
+
+/* Custom Select Wrappers */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: #1d150b;
+  border: 1px solid rgba(232, 184, 75, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+}
+
+.select-wrapper select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(232, 184, 75, 0.15);
+}
+
+.select-wrapper::after {
+  content: '▼';
+  font-size: 0.65rem;
+  color: var(--accent);
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Instrument Grid Buttons */
+.inst-pill-grid {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.inst-pill-btn {
+  max-width: 240px;
+  width: 100%;
+}
+
+.inst-pill-btn {
+  background: #18120a;
+  border: 1px solid rgba(232, 184, 75, 0.1);
+  border-radius: 10px;
+  padding: 0.75rem;
+  color: #a08a70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inst-pill-btn:hover {
+  background: #241a0d;
+  color: #fff;
+}
+
+.inst-pill-btn--active {
+  background: #2d1e0d;
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(232, 184, 75, 0.08);
+}
+
+.inst-pill-btn__emoji {
+  font-size: 1.3rem;
+}
+
+.inst-pill-btn__name {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.inst-pill-btn__hint {
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+
+/* ─── Mixer Console ─── */
+.mixer-console {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  padding: 1rem 0 0.5rem;
+}
+
+.mixer-channel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+}
+
+.mixer-channel__fader-container {
+  height: 180px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  width: 32px;
+}
+
+/* Vertical slider styling trick */
+.mixer-channel__fader {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 8px;
+  height: 100%;
+  appearance: none;
+  background: #18120a;
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid rgba(232, 184, 75, 0.1);
+  cursor: pointer;
+}
+
+/* Fader Track Details (VU Meter ticks representation) */
+.mixer-channel__fader-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  border-left: 1px dashed rgba(232, 184, 75, 0.15);
+  border-right: 1px dashed rgba(232, 184, 75, 0.15);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Fader Thumb */
+.mixer-channel__fader::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--accent);
+  border: 1px solid #ffdf9e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.mixer-channel__fader::-moz-range-thumb {
+  width: 24px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--accent);
+  border: 1px solid #ffdf9e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.mixer-channel__vol {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+  font-feature-settings: "tnum";
+}
+
+.mixer-channel__mute-btn {
+  background: #1d150b;
+  border: 1px solid rgba(232, 184, 75, 0.15);
+  padding: 0.35rem;
+  border-radius: 6px;
+  color: #a08a70;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mixer-channel__mute-btn:hover {
+  color: #fff;
+}
+
+.mixer-channel__mute-btn--muted {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444 !important;
+}
+
+.mixer-channel__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #a08a70;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.mixer-channel__sublabel {
+  font-size: 0.6rem;
+  opacity: 0.5;
+  margin-top: 0.1rem;
+}
+
+/* ─── Scale / Pitch controls ─── */
+.scale-board {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.scale-key-btn {
+  background: #18120a;
+  border: 1px solid rgba(232, 184, 75, 0.15);
+  border-radius: 6px;
+  padding: 0.6rem 0.25rem;
+  color: #a08a70;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.scale-key-btn:hover {
+  background: #241a0d;
+  color: #fff;
+}
+
+.scale-key-btn--active {
+  background: var(--accent);
+  color: #0e0a04;
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(232, 184, 75, 0.3);
+}
+
+.fine-tune-panel {
+  background: #140e06;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(232, 184, 75, 0.08);
+}
+
+.fine-tune-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.fine-tune-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.fine-tune-slider {
+  width: 100%;
+  appearance: none;
+  background: #1d150b;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+}
+
+.fine-tune-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #140e06;
+  cursor: pointer;
+}
+
+.fine-tune-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #140e06;
+  cursor: pointer;
+}
+
+/* ─── Tempo and Master Control Row ─── */
+.tempo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tempo-slider-wrap {
+  flex: 1;
+}
+
+.tempo-num-display {
+  background: #18120a;
+  border: 1px solid rgba(232, 184, 75, 0.15);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  min-width: 100px;
+  text-align: center;
+}
+
+.tempo-num-display__value {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  font-feature-settings: "tnum";
+}
+
+.tempo-num-display__label {
+  font-size: 0.6rem;
+  color: #a08a70;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tap-tempo-btn {
+  background: linear-gradient(180deg, #2a1e0f 0%, #1e1408 100%);
+  border: 1px solid rgba(232, 184, 75, 0.2);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  color: #e5c38d;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tap-tempo-btn:hover {
+  background: #2d1e0d;
+  border-color: var(--accent);
+}
+
+.tap-tempo-btn:active {
+  transform: translateY(1px);
+  background: var(--accent);
+  color: #0e0a04;
+}
+
+/* Master Action Button */
+.master-play-btn {
+  width: 100%;
+  padding: 1.1rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.master-play-btn--inactive {
+  background: var(--accent);
+  color: #0e0a04;
+}
+
+.master-play-btn--inactive:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.master-play-btn--active {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
+}
+
+.master-play-btn--active:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+/* Info Panel */
+.practice-info {
+  margin-top: 2rem;
+  background: rgba(24, 18, 10, 0.5);
+  border: 1px dashed rgba(232, 184, 75, 0.15);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.practice-info p {
+  color: #a08a70;
+  margin-bottom: 0.75rem;
+}
+
+.practice-info p:last-child {
+  margin-bottom: 0;
+}
+
+.practice-info strong {
+  color: #fff;
+}
+
+/* ─── Mobile Adjustments ─── */
+@media (max-width: 600px) {
+  .practice-page {
+    padding: 2rem 0;
+  }
+  .practice-header__title {
+    font-size: 2rem;
+  }
+  .console-card {
+    padding: 1.25rem;
+  }
+  .inst-pill-grid {
+    justify-content: center;
+  }
+  .mixer-console {
+    gap: 0.5rem;
+  }
+  .mixer-channel {
+    width: 65px;
+  }
+  .mixer-channel__fader-container {
+    height: 140px;
+  }
+  .scale-board {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

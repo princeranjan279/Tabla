@@ -1,4 +1,4 @@
-import { Award, BookOpen, Clock, GraduationCap, Music, Star, CheckCircle, Users, Globe, Home as HomeIcon } from 'lucide-react';
+import { Award, BookOpen, Clock, GraduationCap, Music, Star, CheckCircle, Users, Globe, Home as HomeIcon, Mic2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './About.css';
 
@@ -8,6 +8,7 @@ const keyPoints = [
   { icon: <Clock size={22} />, title: '30+ Years of Teaching', desc: 'Over three decades of unbroken dedication to teaching Tabla to students of all ages — from below 10 years to well above 60.' },
   { icon: <Users size={22} />, title: '500+ Students Trained', desc: 'Hundreds of students have learned under his guidance, many of whom have gone on to perform at state, national, and international level events.' },
   { icon: <Music size={22} />, title: 'Hindustani Classical Expert', desc: 'Deep expertise in Taal, Laykari, Kaida, Rela, and the rhythmic traditions of multiple Gharanas of the Tabla.' },
+  { icon: <Mic2 size={22} />, title: 'Tabla Accompanist (Sangat)', desc: 'An accomplished accompanist who has provided Tabla sangat to sitarists, sarod players, violinists, guitarists, vocalists, and classical dancers across Bihar and beyond.' },
   { icon: <BookOpen size={22} />, title: 'Holistic Teaching Method', desc: 'Teaching goes beyond strokes — students learn music theory, rhythm mathematics, and the cultural significance of each composition.' },
   { icon: <Globe size={22} />, title: 'Online & Offline Reach', desc: 'Conducts classes both at his Jakkanpur, Gardanibagh, Patna residence and online via Google Meet, enabling students across India and abroad to learn.' },
   { icon: <HomeIcon size={22} />, title: 'Home Visits Available', desc: 'Offers personalised home-visit sessions within Patna for students who prefer learning in their own environment.' },
@@ -26,7 +27,17 @@ const timeline = [
 const specialties = [
   'Teen Taal', 'Ek Taal', 'Jhap Taal', 'Rupak Taal',
   'Kaida compositions', 'Rela & Tihai', 'Peshkar', 'Kayda variations',
-  'Solo Tabla performances', 'Accompaniment with Vocal & Instrumental',
+  'Solo Tabla performances', 'Sitar Sangat', 'Sarod Sangat',
+  'Vocal Accompaniment', 'Dance Accompaniment', 'Guitar Sangat', 'Violin Sangat',
+];
+
+const sangat = [
+  { instrument: 'Sitar', icon: '𝄞', note: 'Classical string — intricate rhythm sync' },
+  { instrument: 'Sarod', icon: '♬', note: 'Deep melodic lines — precise taal support' },
+  { instrument: 'Violin', icon: '♪', note: 'Classical & semi-classical contexts' },
+  { instrument: 'Guitar', icon: '𝄢', note: 'Cross-genre fusion accompaniment' },
+  { instrument: 'Vocal (Gayaki)', icon: '🎤', note: 'Khayal, Thumri, Bhajan & more' },
+  { instrument: 'Classical Dance', icon: '💃', note: 'Kathak & other forms — rhythmic foundation' },
 ];
 
 export default function About() {
@@ -41,7 +52,7 @@ export default function About() {
             Shri Subodh Ranjan Prasad
           </h1>
           <p className="about-hero__sub">
-            Sangeet Praveen • Tabla Maestro • Patna, Bihar
+            Sangeet Praveen • Tabla Maestro • Tabla Accompanist • Patna, Bihar
           </p>
           <div className="about-hero__badges">
             <span className="badge badge-gold"><Award size={13} /> 30+ Years Experience</span>
@@ -99,6 +110,13 @@ export default function About() {
               accessible to learners across India and beyond. He is currently working as a Tabla Faculty for Class 1 to 10 students at Delhi Public School, Patna East, and also teaches international students, currently conducting online sessions for students in the USA.
             </p>
             <p className="about-bio__para">
+              Beyond the teaching hall, Shri Subodh Ranjan Prasad is a seasoned <strong>Tabla accompanist (Sangat)</strong> —
+              having performed alongside sitarists, sarod players, violinists, guitarists, vocalists, and classical dancers
+              at prestigious programmes across Bihar, including events at Bhartiya Nritya Kala Mandir, Kashi Sangeet Sabha (Varanasi),
+              and private classical music soirées. His accompaniment is marked by deep rhythmic empathy and mastery of the full
+              Taal repertoire.
+            </p>
+            <p className="about-bio__para">
               His teaching philosophy centres on the guru-shishya tradition — building not just technical skill, but a lifelong
               love for the art. He teaches all age groups, from children below 10 to adults above 60, adapting his method to
               each student's learning pace and goal.
@@ -146,6 +164,27 @@ export default function About() {
                 <div className="timeline__dot" />
                 <div className="timeline__year">{year}</div>
                 <div className="timeline__event">{event}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Accompaniment Roles */}
+      <section className="section about-sangat" id="sangat-section">
+        <div className="container">
+          <div className="section-header">
+            <span className="ornament-text">Sangat</span>
+            <h2 className="section-title" style={{ marginTop: '0.5rem' }}>Tabla <span className="gradient-text">Accompaniment</span></h2>
+            <div className="gold-divider" />
+            <p className="section-subtitle">Guruji as a performing accompanist — the art of supporting and elevating other musicians</p>
+          </div>
+          <div className="expertise__grid">
+            {sangat.map(({ instrument, icon, note }) => (
+              <div className="expertise-card" key={instrument} id={`sangat-${instrument.toLowerCase().replace(/\s+/g, '-')}`}>
+                <div className="expertise-card__icon" style={{ fontSize: '1.6rem', lineHeight: 1 }}>{icon}</div>
+                <h3 className="expertise-card__title">{instrument}</h3>
+                <p className="expertise-card__desc">{note}</p>
               </div>
             ))}
           </div>
