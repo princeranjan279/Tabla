@@ -52,6 +52,7 @@ export default function AdminDashboard() {
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [riyazUsers, setRiyazUsers]           = useState<RiyazUser[]>([]);
   const [loadingSubs, setLoadingSubs]         = useState(true);
+  const [fetchErrorSubs, setFetchErrorSubs]   = useState('');
 
   // Common action states
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -78,15 +79,18 @@ export default function AdminDashboard() {
   // Real-time listeners for subscriptions & payments
   useEffect(() => {
     if (!user) return;
+    setFetchErrorSubs('');
     
     const unsubRequests = listenToAllPaymentRequests(
       data => {
         setPaymentRequests(data);
         setLoadingSubs(false);
+        setFetchErrorSubs('');
       },
       err => {
         console.error('Firestore error (payments):', err);
-        toast.error('Failed to listen to payment requests.');
+        setFetchErrorSubs(prev => prev || 'Failed to load payment requests: ' + err.message);
+        setLoadingSubs(false);
       }
     );
 
@@ -96,7 +100,7 @@ export default function AdminDashboard() {
       },
       err => {
         console.error('Firestore error (users):', err);
-        toast.error('Failed to listen to Riyaz users.');
+        setFetchErrorSubs(prev => prev || 'Failed to load Riyaz users: ' + err.message);
       }
     );
 
@@ -105,6 +109,7 @@ export default function AdminDashboard() {
       unsubUsers();
     };
   }, [user]);
+
 
   const handleLogout = async () => {
     await logout();
@@ -499,6 +504,14 @@ export default function AdminDashboard() {
              SUBSCRIPTIONS TAB
              ======================================================================= */
           <>
+            {fetchErrorSubs && (
+              <div className="ad-fetch-error" style={{ margin: '0 0 1.5rem 0' }}>
+                <span>⚠️ <strong>Firestore Error:</strong> {fetchErrorSubs}</span>
+                <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                  If you see a <code>permission-denied</code> error, please ensure you have published the corrected Firestore Security Rules in the Firebase console.
+                </p>
+              </div>
+            )}
             {/* Stats */}
             <div className="ad-stats" id="admin-sub-stats">
               {[

@@ -4,10 +4,11 @@ service cloud.firestore {
 
     // Helper function to check if the logged-in user is an admin
     function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.email.toLowerCase().startsWith('admin@') || 
-        request.auth.token.email.toLowerCase() == 'princeranjan279@gmail.com'
-      );
+      return request.auth != null && 
+        'email' in request.auth.token && (
+          request.auth.token.email.lower().startsWith('admin@') || 
+          request.auth.token.email.lower() == 'princeranjan279@gmail.com'
+        );
     }
 
     // ==========================================
