@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Sun, Moon, Menu, X, Music2 } from 'lucide-react';
+import { Sun, Moon, Menu, X, Music2, LogOut, User } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const navLinks = [
@@ -17,6 +18,7 @@ const navLinks = [
 
 export default function Navbar() {
   const { toggleTheme, isDark } = useTheme();
+  const { user, logout, isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -71,6 +73,33 @@ export default function Navbar() {
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="navbar__auth-group">
+              {isAdmin && (
+                <Link to="/admin" className="navbar__link" style={{ fontSize: '0.85rem', fontWeight: 700 }}>
+                  Admin
+                </Link>
+              )}
+              <button
+                onClick={logout}
+                className="btn btn-outline"
+                style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem', height: '36px' }}
+                id="btn-nav-logout"
+              >
+                <LogOut size={13} /> Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/riyaz-login"
+              className="navbar__link"
+              style={{ fontSize: '0.85rem', fontWeight: 700 }}
+              id="btn-nav-login"
+            >
+              <User size={13} style={{ verticalAlign: 'middle', marginRight: '3px' }} /> Login
+            </Link>
+          )}
+
           <Link to="/book" className="btn btn-primary navbar__cta" id="nav-cta">
             Enroll Now
           </Link>
@@ -104,6 +133,33 @@ export default function Navbar() {
               {label}
             </NavLink>
           ))}
+
+          {user ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1.5rem' }}>
+              {isAdmin && (
+                <Link to="/admin" className="navbar__drawer-link" onClick={() => setOpen(false)}>
+                  Admin Dashboard
+                </Link>
+              )}
+              <button
+                onClick={() => { logout(); setOpen(false); }}
+                className="btn btn-outline"
+                style={{ justifyContent: 'center' }}
+              >
+                <LogOut size={14} /> Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/riyaz-login"
+              className="navbar__drawer-link"
+              onClick={() => setOpen(false)}
+              style={{ marginTop: '1.5rem', fontWeight: 700 }}
+            >
+              <User size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Riyaz Login
+            </Link>
+          )}
+
           <Link
             to="/book"
             className="btn btn-primary"
@@ -127,3 +183,4 @@ export default function Navbar() {
     </header>
   );
 }
+

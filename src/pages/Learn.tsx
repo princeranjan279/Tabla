@@ -5,6 +5,7 @@ import {
   Award, Play, Square, Minus, Plus
 } from 'lucide-react';
 import './Learn.css';
+import TrialBanner from '../components/TrialBanner';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & TYPES
@@ -13,6 +14,7 @@ import './Learn.css';
 type Instrument = 'harmonium';
 type Level = 'all' | 'beginner' | 'intermediate' | 'advanced';
 type Tab = 'bols' | 'lehra';
+type TanpuraTuning = 'Pa' | 'Ma' | 'Ni';
 
 const BASE_SA_FREQ = 261.63; // C4 Sa
 const NOTE_SEMITONES: Record<string, number> = {
@@ -60,8 +62,102 @@ function chain(nodes: AudioNode[]): void {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// TANPURA PHYSICAL MODEL — Karplus-Strong Extended String Synthesis
+// Identical engine to Riyaz Studio (Practice.tsx)
+// ═══════════════════════════════════════════════════════════════════════════════
 
+function buildKarplusBuffer(
+  ctx: AudioContext,
+  freq: number,
+  sampleRate: number
+): AudioBuffer {
+  const N = Math.round(sampleRate / freq);
+  const totalSamples = Math.floor(sampleRate * 8);
+  const buf = ctx.createBuffer(1, totalSamples, sampleRate);
+  const data = buf.getChannelData(0);
 
+  const delayLine = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const t = i / N;
+    const window = t < 0.5 ? 2 * t : 2 * (1 - t);
+    delayLine[i] = (Math.random() * 2 - 1) * window;
+  }
+
+  let readPos = 0;
+  let lastSample = 0;
+  const feedbackGain = 0.998;
+  const lpCoeff = 0.55;
+
+  for (let i = 0; i < totalSamples; i++) {
+    const current = delayLine[readPos];
+    const filtered = feedbackGain * (lpCoeff * current + (1 - lpCoeff) * lastSample);
+    const jawariClip = filtered > 0
+      ? Math.tanh(filtered * 1.8) * 0.7 + filtered * 0.3
+      : filtered * 0.85;
+    data[i] = jawariClip;
+    delayLine[readPos] = filtered;
+    lastSample = current;
+    readPos = (readPos + 1) % N;
+  }
+  return buf;
+}
+
+function synthTanpuraString(
+  ctx: AudioContext,
+  freq: number,
+  t0: number,
+  dur: number,
+  vol: number,
+  destNode: AudioNode
+): void {
+  const ksBuffer = buildKarplusBuffer(ctx, freq, ctx.sampleRate);
+  const src = ctx.createBufferSource();
+  src.buffer = ksBuffer;
+
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0, t0);
+  master.gain.linearRampToValueAtTime(vol, t0 + 0.025);
+  master.gain.setValueAtTime(vol, t0 + dur - 0.08);
+  master.gain.linearRampToValueAtTime(0, t0 + dur);
+
+  const bodyBass = ctx.createBiquadFilter();
+  bodyBass.type = 'peaking';
+  bodyBass.frequency.value = 140;
+  bodyBass.Q.value = 3.5;
+  bodyBass.gain.value = 8;
+
+  const bodyMid = ctx.createBiquadFilter();
+  bodyMid.type = 'peaking';
+  bodyMid.frequency.value = 310;
+  bodyMid.Q.value = 2.5;
+  bodyMid.gain.value = 5;
+
+  const bodyNeck = ctx.createBiquadFilter();
+  bodyNeck.type = 'peaking';
+  bodyNeck.frequency.value = 820;
+  bodyNeck.Q.value = 1.8;
+  bodyNeck.gain.value = 4;
+
+  const bodyHiShelf = ctx.createBiquadFilter();
+  bodyHiShelf.type = 'highshelf';
+  bodyHiShelf.frequency.value = 4000;
+  bodyHiShelf.gain.value = -6;
+
+  const jivaPitchLFO = ctx.createOscillator();
+  jivaPitchLFO.type = 'sine';
+  jivaPitchLFO.frequency.value = 0.22;
+  const jivaMod = ctx.createGain();
+  jivaMod.gain.value = 3.5;
+  jivaPitchLFO.connect(jivaMod);
+  jivaMod.connect(src.detune);
+  jivaPitchLFO.start(t0);
+  jivaPitchLFO.stop(t0 + dur + 0.1);
+
+  chain([src, master, bodyBass, bodyMid, bodyNeck, bodyHiShelf, destNode]);
+  src.start(t0);
+  src.stop(t0 + dur + 0.1);
+}
 
 function synthHarmonium(
   ctx: AudioContext, freq: number,
@@ -70,34 +166,136 @@ function synthHarmonium(
   const master = ctx.createGain();
   master.connect(destNode);
 
-  // Bellows low-pass filter (warmer tone, air pressure controlled)
-  const lp = ctx.createBiquadFilter();
-  lp.type = 'lowpass';
-  lp.frequency.setValueAtTime(800, t0);
-  lp.frequency.exponentialRampToValueAtTime(2400, t0 + 0.08); // Bellows attack swell
-  lp.frequency.exponentialRampToValueAtTime(1400, t0 + dur);   // Bellows release
-  lp.connect(master);
+  // 1. Air Leak/Turbulence Noise (Bellows wind)
+  const noiseLength = Math.floor(ctx.sampleRate * (dur + 0.1));
+  const noiseBuf = ctx.createBuffer(1, noiseLength, ctx.sampleRate);
+  const noiseData = noiseBuf.getChannelData(0);
+  for (let i = 0; i < noiseLength; i++) {
+    noiseData[i] = (Math.random() * 2 - 1) * 0.015;
+  }
+  const noiseNode = ctx.createBufferSource();
+  noiseNode.buffer = noiseBuf;
 
-  // Nasal reed formant filter (boosts 1.3kHz - 1.8kHz region for reedy character)
-  const reedFilter = ctx.createBiquadFilter();
-  reedFilter.type = 'peaking';
-  reedFilter.frequency.value = 1500;
-  reedFilter.Q.value = 2.2;
-  reedFilter.gain.value = 9; // Rich harmonium bite
-  reedFilter.connect(lp);
+  const noiseLP = ctx.createBiquadFilter();
+  noiseLP.type = 'bandpass';
+  noiseLP.frequency.value = 350; // Low frequency bellows air rumble
+  noiseLP.Q.value = 1.0;
 
-  // Bellows pressure LFO (tremolo effect)
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0, t0);
+  noiseGain.gain.linearRampToValueAtTime(vol * 0.08, t0 + 0.05); // air builds up
+  noiseGain.gain.setValueAtTime(vol * 0.08, t0 + dur - 0.04);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.08);
+
+  chain([noiseNode, noiseLP, noiseGain, master]);
+  noiseNode.start(t0);
+  noiseNode.stop(t0 + dur + 0.1);
+
+  // 2. Bellows LFO (Pumping Tremolo & Vibrato)
   const bellowsLFO = ctx.createOscillator();
-  const bellowsGain = ctx.createGain();
-  bellowsLFO.frequency.value = 5.2; // 5.2Hz bellows pumping
-  bellowsGain.gain.value = 0.06;
-  bellowsLFO.connect(bellowsGain);
-  bellowsGain.connect(master.gain);
+  bellowsLFO.frequency.value = 5.2; // 5.2Hz pumping
+
+  const bellowsGainMod = ctx.createGain();
+  bellowsGainMod.gain.value = 0.08; // volume tremolo depth
+
+  const bellowsPitchMod = ctx.createGain();
+  bellowsPitchMod.gain.value = 8; // vibrato depth in cents
+
+  bellowsLFO.connect(bellowsGainMod);
+  bellowsLFO.connect(bellowsPitchMod);
+
+  const bellowsModNode = ctx.createGain();
+  bellowsModNode.gain.value = 1.0;
+  bellowsGainMod.connect(bellowsModNode.gain);
+
   bellowsLFO.start(t0);
   bellowsLFO.stop(t0 + dur + 0.1);
 
-  // Key click sound (mechanical key press noise)
-  const clickBuf = ctx.createBuffer(1, ctx.sampleRate * 0.005, ctx.sampleRate);
+  // 3. Formant Filters (Wood cabinet resonance)
+  const woodFilterLow = ctx.createBiquadFilter();
+  woodFilterLow.type = 'peaking';
+  woodFilterLow.frequency.value = 400; // Wood body resonance
+  woodFilterLow.Q.value = 2.0;
+  woodFilterLow.gain.value = 6;
+
+  const woodFilterHigh = ctx.createBiquadFilter();
+  woodFilterHigh.type = 'peaking';
+  woodFilterHigh.frequency.value = 1200; // Reed chamber resonance
+  woodFilterHigh.Q.value = 1.8;
+  woodFilterHigh.gain.value = 8;
+
+  const mainLP = ctx.createBiquadFilter();
+  mainLP.type = 'lowpass';
+  mainLP.frequency.setValueAtTime(800, t0);
+  mainLP.frequency.exponentialRampToValueAtTime(2800, t0 + 0.06); // brightness swell
+  mainLP.frequency.exponentialRampToValueAtTime(1600, t0 + dur);
+
+  chain([woodFilterLow, woodFilterHigh, mainLP, bellowsModNode, master]);
+
+  // 4. Oscillators (Multi-Reed Chorus)
+  const oscs: OscillatorNode[] = [];
+
+  // Male Reeds (fundamental chorus): Two detuned sawtooths
+  const maleDets = [-6, 6];
+  maleDets.forEach(det => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.value = freq;
+    o.detune.value = det;
+    g.gain.value = 0.26;
+    
+    bellowsPitchMod.connect(o.detune);
+    chain([o, g, woodFilterLow]);
+    oscs.push(o);
+  });
+
+  // Female Reeds (high octave chorus): Detuned sawtooth
+  const femaleDets = [-4, 8];
+  femaleDets.forEach(det => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.value = freq * 2;
+    o.detune.value = det;
+    g.gain.value = 0.16;
+    
+    bellowsPitchMod.connect(o.detune);
+    chain([o, g, woodFilterLow]);
+    oscs.push(o);
+  });
+
+  // Bass Reed (low octave body): Rich triangle/sawtooth blend
+  const bassO1 = ctx.createOscillator();
+  const bassO2 = ctx.createOscillator();
+  const gBass1 = ctx.createGain();
+  const gBass2 = ctx.createGain();
+
+  bassO1.type = 'triangle';
+  bassO1.frequency.value = freq * 0.5;
+  bassO1.detune.value = -3;
+  gBass1.gain.value = 0.22;
+
+  bassO2.type = 'sawtooth';
+  bassO2.frequency.value = freq * 0.5;
+  bassO2.detune.value = 3;
+  gBass2.gain.value = 0.14;
+
+  bellowsPitchMod.connect(bassO1.detune);
+  bellowsPitchMod.connect(bassO2.detune);
+
+  chain([bassO1, gBass1, woodFilterLow]);
+  chain([bassO2, gBass2, woodFilterLow]);
+  oscs.push(bassO1, bassO2);
+
+  // Start & Stop all oscillators
+  oscs.forEach(o => {
+    o.start(t0);
+    o.stop(t0 + dur + 0.1);
+  });
+
+  // 5. Key press mechanical clicks
+  const clickBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.005), ctx.sampleRate);
   const clickData = clickBuf.getChannelData(0);
   for (let i = 0; i < clickBuf.length; i++) {
     clickData[i] = Math.random() * 2 - 1;
@@ -113,43 +311,31 @@ function synthHarmonium(
   chain([clickNode, clickFilter, clickGainNode, master]);
   clickNode.start(t0);
 
-  // Male reed: Fundamental sawtooth detuned flat
-  const oscMale = ctx.createOscillator();
-  const gMale = ctx.createGain();
-  oscMale.type = 'sawtooth';
-  oscMale.frequency.value = freq;
-  oscMale.detune.value = -12; // detuned for beating warmth
-  gMale.gain.value = 0.38;
+  // 6. Key release click sound (mechanical key release noise)
+  const releaseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.008), ctx.sampleRate);
+  const releaseData = releaseBuf.getChannelData(0);
+  for (let i = 0; i < releaseBuf.length; i++) {
+    releaseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / releaseBuf.length, 1.5);
+  }
+  const releaseNode = ctx.createBufferSource();
+  releaseNode.buffer = releaseBuf;
+  
+  const releaseFilter = ctx.createBiquadFilter();
+  releaseFilter.type = 'bandpass';
+  releaseFilter.frequency.value = 1400; // lower pitch click for release
+  
+  const releaseGain = ctx.createGain();
+  releaseGain.gain.setValueAtTime(vol * 0.03, t0 + dur);
+  releaseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.008);
+  
+  chain([releaseNode, releaseFilter, releaseGain, master]);
+  releaseNode.start(t0 + dur);
 
-  // Female reed: Octave higher sawtooth detuned sharp
-  const oscFemale = ctx.createOscillator();
-  const gFemale = ctx.createGain();
-  oscFemale.type = 'sawtooth';
-  oscFemale.frequency.value = freq * 2;
-  oscFemale.detune.value = 12; // detuned for beating warmth
-  gFemale.gain.value = 0.22;
-
-  // Sub-reed (Bass): Octave lower triangle for body warmth
-  const oscBass = ctx.createOscillator();
-  const gBass = ctx.createGain();
-  oscBass.type = 'triangle';
-  oscBass.frequency.value = freq * 0.5;
-  gBass.gain.value = 0.30;
-
-  chain([oscMale, gMale, reedFilter]);
-  chain([oscFemale, gFemale, reedFilter]);
-  chain([oscBass, gBass, reedFilter]);
-
-  [oscMale, oscFemale, oscBass].forEach(o => {
-    o.start(t0);
-    o.stop(t0 + dur + 0.08);
-  });
-
-  // Soft envelope for air pressure buildup and release
+  // Main Volume Envelope (build-up and release)
   master.gain.setValueAtTime(0, t0);
-  master.gain.linearRampToValueAtTime(vol * 0.85, t0 + 0.04);
-  master.gain.setValueAtTime(vol, t0 + dur - 0.05);
-  master.gain.linearRampToValueAtTime(0, t0 + dur + 0.03);
+  master.gain.linearRampToValueAtTime(vol * 0.85, t0 + 0.05); // smooth attack
+  master.gain.setValueAtTime(vol, t0 + dur - 0.04);
+  master.gain.linearRampToValueAtTime(0, t0 + dur + 0.06); // release
 }
 
 function synthNote(
@@ -409,6 +595,9 @@ const levelFilters = [
 function useLehraPlayer() {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [currentBeat, setCurrentBeat] = useState<number>(-1);
+  const [tanpuraVol, setTanpuraVol] = useState(0.45);
+  const [isTanpuraMuted, setIsTanpuraMuted] = useState(false);
+  const [tanpuraTuning, setTanpuraTuning] = useState<TanpuraTuning>('Pa');
 
   const ctxRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -419,6 +608,28 @@ function useLehraPlayer() {
   const khaliRef = useRef<number[]>([]);
   const bpmRef = useRef<number>(60);
   const instrumentRef = useRef<Instrument>('harmonium');
+
+  // Tanpura scheduling refs
+  const nextTanpuraTimeRef = useRef<number>(0);
+  const tanpuraBeatRef = useRef<number>(0);
+  const tanpuraGainRef = useRef<GainNode | null>(null);
+  const tanpuraVolRef = useRef(0.45);
+  const isTanpuraMutedRef = useRef(false);
+  const tanpuraTuningRef = useRef<TanpuraTuning>('Pa');
+
+  // Sync tanpura params to refs
+  useEffect(() => { tanpuraVolRef.current = tanpuraVol; }, [tanpuraVol]);
+  useEffect(() => { isTanpuraMutedRef.current = isTanpuraMuted; }, [isTanpuraMuted]);
+  useEffect(() => { tanpuraTuningRef.current = tanpuraTuning; }, [tanpuraTuning]);
+
+  // Live volume update on gain node
+  useEffect(() => {
+    const ctx = ctxRef.current;
+    if (ctx && tanpuraGainRef.current) {
+      const v = isTanpuraMuted ? 0 : tanpuraVol;
+      tanpuraGainRef.current.gain.linearRampToValueAtTime(v, ctx.currentTime + 0.05);
+    }
+  }, [tanpuraVol, isTanpuraMuted]);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -431,6 +642,7 @@ function useLehraPlayer() {
     const ctx = ctxRef.current;
     if (!ctx) return;
 
+    // 1. Schedule lehra notes
     while (nextTimeRef.current < ctx.currentTime + 0.13) {
       const beat = beatRef.current;
       const note = seqRef.current[beat];
@@ -452,6 +664,34 @@ function useLehraPlayer() {
       nextTimeRef.current += bps;
       beatRef.current = (beat + 1) % seqRef.current.length;
     }
+
+    // 2. Schedule tanpura strings — Pa→Sa→Sa→Sa(low) every 1.5s
+    const tanpGain = tanpuraGainRef.current;
+    if (!tanpGain) return;
+    while (nextTanpuraTimeRef.current < ctx.currentTime + 0.13) {
+      const tBeat = tanpuraBeatRef.current;
+      const playAt = nextTanpuraTimeRef.current;
+
+      // String tuning: beat 0 = Pa (or Ma/Ni), beats 1&2 = Sa, beat 3 = Sa low octave
+      let semitoneOffset = 0;
+      if (tBeat === 0) {
+        const tuning = tanpuraTuningRef.current;
+        semitoneOffset = tuning === 'Pa' ? 7 : tuning === 'Ma' ? 5 : 11;
+      } else if (tBeat === 1 || tBeat === 2) {
+        semitoneOffset = 0; // Middle Sa
+      } else {
+        semitoneOffset = -12; // Low octave Sa
+      }
+
+      const stringFreq = BASE_SA_FREQ * Math.pow(2, semitoneOffset / 12);
+      const vol = isTanpuraMutedRef.current ? 0 : tanpuraVolRef.current;
+      if (vol > 0) {
+        synthTanpuraString(ctx, stringFreq, playAt, 4.5, vol, tanpGain);
+      }
+
+      nextTanpuraTimeRef.current += 1.5;
+      tanpuraBeatRef.current = (tBeat + 1) % 4;
+    }
   }, []);
 
   const play = useCallback((taal: TaalLehra, bpm: number, instrument: Instrument) => {
@@ -459,8 +699,15 @@ function useLehraPlayer() {
     if (!ctxRef.current || ctxRef.current.state === 'closed') {
       ctxRef.current = new AudioContext();
     }
-    if (ctxRef.current.state === 'suspended') {
-      ctxRef.current.resume();
+    const ctx = ctxRef.current;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    // Setup tanpura gain node routed to destination
+    if (!tanpuraGainRef.current) {
+      const tg = ctx.createGain();
+      tg.gain.value = isTanpuraMutedRef.current ? 0 : tanpuraVolRef.current;
+      tg.connect(ctx.destination);
+      tanpuraGainRef.current = tg;
     }
 
     seqRef.current = taal.notes;
@@ -469,7 +716,10 @@ function useLehraPlayer() {
     bpmRef.current = bpm;
     instrumentRef.current = instrument;
     beatRef.current = 0;
-    nextTimeRef.current = ctxRef.current.currentTime + 0.05;
+    nextTimeRef.current = ctx.currentTime + 0.05;
+
+    tanpuraBeatRef.current = 0;
+    nextTanpuraTimeRef.current = ctx.currentTime + 0.1;
 
     setPlayingId(taal.id);
     setCurrentBeat(-1);
@@ -479,8 +729,15 @@ function useLehraPlayer() {
   const stop = useCallback(() => {
     clearTimer();
     beatRef.current = 0;
+    tanpuraBeatRef.current = 0;
     setPlayingId(null);
     setCurrentBeat(-1);
+    // Close audio context to stop all sound cleanly
+    if (ctxRef.current) {
+      ctxRef.current.close();
+      ctxRef.current = null;
+      tanpuraGainRef.current = null;
+    }
   }, [clearTimer]);
 
   const updateBpm = useCallback((bpm: number) => {
@@ -496,7 +753,12 @@ function useLehraPlayer() {
     ctxRef.current?.close();
   }, [clearTimer]);
 
-  return { playingId, currentBeat, play, stop, updateBpm, updateInstrument };
+  return {
+    playingId, currentBeat, play, stop, updateBpm, updateInstrument,
+    tanpuraVol, setTanpuraVol,
+    isTanpuraMuted, setIsTanpuraMuted,
+    tanpuraTuning, setTanpuraTuning,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -648,13 +910,20 @@ export default function Learn() {
     currentBeat,
     play,
     stop,
-    updateBpm
+    updateBpm,
+    tanpuraVol,
+    setTanpuraVol,
+    isTanpuraMuted,
+    setIsTanpuraMuted,
+    tanpuraTuning,
+    setTanpuraTuning,
   } = useLehraPlayer();
 
   const filteredBols = level === 'all' ? bolsData : bolsData.filter(b => b.level === level);
 
   return (
     <main className="learn-page" id="learn-main">
+      <TrialBanner />
       {/* ── Hero ── */}
       <section className="learn-hero" id="learn-hero">
         <div className="learn-hero__overlay" />
@@ -794,6 +1063,57 @@ export default function Learn() {
               (X), the <span style={{ color: 'var(--gold-400)' }}>dashed beat</span> is Khali (0). Adjust BPM freely
               while playing.
             </p>
+
+            {/* ── Tanpura Control Bar ── */}
+            <div className="lehra-tanpura-bar" id="lehra-tanpura-bar">
+              <div className="lehra-tanpura-bar__icon">🎵</div>
+              <div className="lehra-tanpura-bar__label">Tanpura Drone</div>
+
+              {/* Tuning selector */}
+              <div className="lehra-tanpura-bar__tuning">
+                {(['Pa', 'Ma', 'Ni'] as const).map(t => (
+                  <button
+                    key={t}
+                    id={`tanpura-tuning-${t.toLowerCase()}`}
+                    className={`lehra-tanpura-tuning-btn${tanpuraTuning === t ? ' active' : ''}`}
+                    onClick={() => setTanpuraTuning(t)}
+                    title={`First string tuned to ${t}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              {/* Volume slider */}
+              <div className="lehra-tanpura-bar__vol">
+                <span className="lehra-tanpura-bar__vol-label">Vol</span>
+                <input
+                  id="lehra-tanpura-vol"
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={tanpuraVol}
+                  onChange={e => setTanpuraVol(parseFloat(e.target.value))}
+                  className="lehra-tanpura-slider"
+                />
+                <span className="lehra-tanpura-bar__vol-pct">{Math.round(tanpuraVol * 100)}%</span>
+              </div>
+
+              {/* Mute toggle */}
+              <button
+                id="lehra-tanpura-mute"
+                className={`lehra-tanpura-mute-btn${isTanpuraMuted ? ' muted' : ''}`}
+                onClick={() => setIsTanpuraMuted(m => !m)}
+                title={isTanpuraMuted ? 'Unmute tanpura' : 'Mute tanpura'}
+              >
+                {isTanpuraMuted ? '🔇 Muted' : '🔊 On'}
+              </button>
+
+              <div className="lehra-tanpura-bar__info">
+                Pa · Sa · Sa · Sā
+              </div>
+            </div>
 
             <div className="lehra-grid" id="lehra-grid">
               {lehraData.map(taal => (

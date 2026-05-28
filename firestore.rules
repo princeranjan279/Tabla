@@ -2,16 +2,71 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Bookings collection:
-    // - Anyone (public) can CREATE a booking (booking form)
-    // - Anyone (public) can READ (get/list) bookings
-    //   This is needed so users can look up their booking by ID or phone number.
-    //   Individual bookings don't contain highly sensitive data beyond name/phone.
-    // - Only logged-in admin can UPDATE or DELETE
+    // Helper function to check if the logged-in user is an admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email.toLowerCase().startsWith('admin@') || 
+        request.auth.token.email.toLowerCase() == 'princeranjan279@gmail.com'
+      );
+    }
+
+    // ==========================================
+    // 1. ONLINE & OFFLINE CLASS BOOKINGS
+    // ==========================================
     match /bookings/{bookingId} {
-      allow create: if true;
+      // Anyone (including guests) can book a class
+      allow create: if true; 
+      
+      // Class details/status can be read by anyone
       allow read: if true;
-      allow update, delete: if request.auth != null;
+      
+      // Only logged-in admin can update or cancel bookings
+      allow update, delete: if request.auth != null && isAdmin();
+    }
+
+    // ==========================================
+    // 2. RIYAZ USERS PROFILES (Admin Dashboard View)
+    // ==========================================
+    match /riyazUsers/{userId} {
+      // Users can see their own profile; Admins can see "All Riyaz Users" list
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      
+      // Users can create their own profile during registration
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Only admins can delete profiles
+      allow delete: if isAdmin();
+      
+      // Allows normal users to update basic profile details (like name) 
+      // and update status to 'pending_payment', but blocks them from activating themselves
+      // or modifying subscriptionExpiry fields
+      allow update: if request.auth != null && (
+        isAdmin() || 
+        (
+          request.auth.uid == userId && 
+          // Users cannot set their status to active, only pending_payment or expired
+          (request.resource.data.subscriptionStatus == 'pending_payment' || request.resource.data.subscriptionStatus == 'expired' || request.resource.data.subscriptionStatus == 'trial') &&
+          // Users cannot modify their own subscriptionExpiry (must remain unchanged or unset)
+          (
+            (!('subscriptionExpiry' in resource.data) && !('subscriptionExpiry' in request.resource.data)) ||
+            (request.resource.data.subscriptionExpiry == resource.data.subscriptionExpiry)
+          )
+        )
+      );
+    }
+
+    // ==========================================
+    // 3. PAYMENT REQUESTS (Admin Subscription Tab)
+    // ==========================================
+    match /paymentRequests/{requestId} {
+      // Logged-in users can submit a request (includes plan, amount, method, UTR)
+      allow create: if request.auth != null;
+      
+      // Users can see their own payment status; Admins can view the whole pending queue
+      allow read: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      
+      // Only admins can trigger actions like [✓ Confirm] or [✗ Reject]
+      allow update, delete: if isAdmin();
     }
   }
 }

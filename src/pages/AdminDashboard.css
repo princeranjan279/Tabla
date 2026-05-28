@@ -212,3 +212,110 @@
   .ad-topbar { padding: 1rem; }
   .ad-stats { grid-template-columns: 1fr 1fr; }
 }
+
+/* Tab Bar */
+.ad-tabs-wrapper {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 2rem;
+  z-index: 10;
+}
+.ad-tabs {
+  display: flex;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.ad-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.ad-tab:hover {
+  color: var(--text-primary);
+}
+.ad-tab.active {
+  color: var(--accent-hover);
+  border-bottom-color: var(--accent);
+}
+[data-theme="dark"] .ad-tab.active {
+  color: var(--accent);
+}
+
+/* Subscription Sections */
+.ad-sub-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.ad-section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+/* UTR Code block */
+.utr-code {
+  font-family: monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+/* Alert States */
+.ad-stat--alert .ad-stat__icon {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+}
+.ad-badge--alert {
+  background: rgba(234, 88, 12, 0.15);
+  color: #ea580c;
+}
+
+/* Extend Action Buttons */
+.ad-action-btn--extend {
+  width: auto;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold-900);
+  background: linear-gradient(135deg, var(--gold-300), var(--gold-400));
+  border: 1px solid var(--gold-500);
+}
+.ad-action-btn--extend:hover {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  color: var(--gold-900);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+.ad-row--pending_payment td {
+  background: rgba(234, 88, 12, 0.02);
+}
+.ad-row--active td {
+  border-left: 3px solid #22c55e;
+}
+.ad-row--trial td {
+  border-left: 3px solid var(--accent);
+}
+.ad-row--expired td {
+  opacity: 0.8;
+  border-left: 3px solid var(--text-muted);
+}
+

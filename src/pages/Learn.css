@@ -467,6 +467,82 @@
   font-size: 0.97rem; line-height: 1.7; margin-bottom: 1.75rem;
 }
 
+/* ─── Tanpura Control Bar (Lehra Practice) ─── */
+.lehra-tanpura-bar {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  max-width: 900px; margin: 0 auto 2rem;
+  background: linear-gradient(135deg, rgba(161,111,46,0.14), rgba(120,80,30,0.08));
+  border: 1.5px solid rgba(200,150,62,0.35);
+  border-radius: 14px; padding: 0.9rem 1.4rem;
+  box-shadow: 0 4px 24px rgba(161,111,46,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
+}
+.lehra-tanpura-bar__icon {
+  font-size: 1.3rem; line-height: 1; flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(200,150,62,0.6));
+}
+.lehra-tanpura-bar__label {
+  font-size: 0.82rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--accent); flex-shrink: 0;
+}
+.lehra-tanpura-bar__tuning {
+  display: flex; gap: 0.3rem; flex-shrink: 0;
+}
+.lehra-tanpura-tuning-btn {
+  padding: 0.28rem 0.65rem; border-radius: 6px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 0.75rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+.lehra-tanpura-tuning-btn:hover {
+  border-color: var(--accent); color: var(--accent);
+}
+.lehra-tanpura-tuning-btn.active {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+  border-color: var(--gold-500); color: #fff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+.lehra-tanpura-bar__vol {
+  display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 160px;
+}
+.lehra-tanpura-bar__vol-label {
+  font-size: 0.7rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em; flex-shrink: 0;
+}
+.lehra-tanpura-slider {
+  flex: 1; height: 4px; border-radius: 2px;
+  accent-color: var(--gold-500);
+  cursor: pointer;
+}
+.lehra-tanpura-bar__vol-pct {
+  font-size: 0.72rem; font-weight: 700; color: var(--accent);
+  min-width: 34px; text-align: right;
+}
+.lehra-tanpura-mute-btn {
+  padding: 0.3rem 0.8rem; border-radius: 6px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.75rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s ease;
+  font-family: var(--font-body); flex-shrink: 0;
+}
+.lehra-tanpura-mute-btn:hover { border-color: var(--accent); color: var(--accent); }
+.lehra-tanpura-mute-btn.muted {
+  background: rgba(220,38,38,0.12);
+  border-color: rgba(220,38,38,0.4); color: #f87171;
+}
+.lehra-tanpura-bar__info {
+  font-size: 0.72rem; color: var(--text-muted);
+  letter-spacing: 0.06em; flex-shrink: 0; margin-left: auto;
+  font-style: italic;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .learn-tabs { max-width: 100%; margin: 2rem 1rem 0; }

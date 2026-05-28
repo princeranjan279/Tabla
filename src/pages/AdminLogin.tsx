@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,7 +6,7 @@ import { Music, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import './AdminLogin.css';
 
 export default function AdminLogin() {
-  const { login } = useAuth();
+  const { login, user, isAdmin, logout } = useAuth();
   const navigate   = useNavigate();
 
   const [email, setEmail]       = useState('');
@@ -15,10 +15,34 @@ export default function AdminLogin() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
 
+  // Check if a non-admin is already logged in and trying to access the admin portal
+  useEffect(() => {
+    if (user && !isAdmin) {
+      setError('Access Denied. Your account does not have administrator privileges.');
+      logout();
+    }
+  }, [user, isAdmin, logout]);
+
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Pre-flight check: Block non-admin emails before calling Firebase Auth
+    const emailLower = email.toLowerCase();
+    const adminEmails = [
+      'admin@tablaclass.com',
+      'admin@tablaclasses.com',
+      'princeranjan279@gmail.com',
+    ];
+    const isAllowedAdmin = adminEmails.includes(emailLower) || emailLower.startsWith('admin@');
+
+    if (!isAllowedAdmin) {
+      setError('Access Denied. This portal is restricted to administrators only.');
+      setLoading(false);
+      return;
+    }
+
     try {
       await login(email, password);
       navigate('/admin');
@@ -35,7 +59,7 @@ export default function AdminLogin() {
           <Music size={28} />
         </div>
         <h1 className="al-card__title">Admin Portal</h1>
-        <p className="al-card__sub">Tabla Classes · Booking Management</p>
+        <p className="al-card__sub">Tabla Classes · Operations Control</p>
 
         <form onSubmit={handleLogin} className="al-form" id="admin-login-form">
           <div className="al-field">

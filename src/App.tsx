@@ -14,6 +14,9 @@ import Learn from './pages/Learn';
 import Practice from './pages/Practice';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import RiyazLogin from './pages/RiyazLogin';
+import SubscribePage from './pages/SubscribePage';
+import SubscriptionGuard from './components/SubscriptionGuard';
 import { Toaster } from 'react-hot-toast';
 
 function ScrollToTop() {
@@ -22,11 +25,11 @@ function ScrollToTop() {
   return null;
 }
 
-/** Redirect unauthenticated users away from admin routes */
+/** Redirect unauthenticated/non-admin users away from admin routes */
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   if (loading) return null;
-  return user ? <>{children}</> : <Navigate to="/admin/login" replace />;
+  return user && isAdmin ? <>{children}</> : <Navigate to="/admin/login" replace />;
 }
 
 /** Admin pages — no Navbar/Footer */
@@ -51,10 +54,12 @@ function AppLayout() {
           <Route path="/about" element={<About />} />
           <Route path="/book" element={<BookSlot />} />
           <Route path="/gallery" element={<Gallery />} />
-          <Route path="/learn" element={<Learn />} />
-          <Route path="/practice" element={<Practice />} />
+          <Route path="/learn" element={<SubscriptionGuard><Learn /></SubscriptionGuard>} />
+          <Route path="/practice" element={<SubscriptionGuard><Practice /></SubscriptionGuard>} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/my-booking" element={<MyBooking />} />
+          <Route path="/riyaz-login" element={<RiyazLogin />} />
+          <Route path="/subscribe" element={<SubscribePage />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </div>
@@ -77,8 +82,8 @@ function AppLayout() {
 /** Root router — splits admin vs public based on pathname */
 function RootRouter() {
   const { pathname } = useLocation();
-  const isAdmin = pathname.startsWith('/admin');
-  return isAdmin ? <AdminLayout /> : <AppLayout />;
+  const isAdminPath = pathname.startsWith('/admin');
+  return isAdminPath ? <AdminLayout /> : <AppLayout />;
 }
 
 export default function App() {
@@ -92,3 +97,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+

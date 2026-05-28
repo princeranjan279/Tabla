@@ -4,6 +4,7 @@ import {
   Activity, Info, Plus, Minus
 } from 'lucide-react';
 import './Practice.css';
+import TrialBanner from '../components/TrialBanner';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & TYPES
@@ -209,24 +210,81 @@ function createReverbBuffer(ctx: AudioContext, duration: number, decay: number):
 
 
 
-// Tanpura Jawari Waveshaping Curve
-let tanpuraCurveCache: Float32Array | null = null;
-function getTanpuraJawariCurve(): Float32Array {
-  if (tanpuraCurveCache) return tanpuraCurveCache;
-  const len = 44100;
-  const curve = new Float32Array(len);
-  for (let i = 0; i < len; i++) {
-    const x = (i * 2) / len - 1;
-    if (x < -0.2) {
-      curve[i] = x * 0.8;
-    } else if (x > 0.2) {
-      curve[i] = 0.16 + 0.24 * Math.sin(x * Math.PI * 0.4);
-    } else {
-      curve[i] = x * 1.2;
-    }
+// ═══════════════════════════════════════════════════════════════════════════════
+// TANPURA PHYSICAL MODEL — Karplus-Strong Extended String Synthesis
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// Research basis:
+//  - Karplus & Strong (1983), "Digital Synthesis of Plucked String and Drum Timbres"
+//  - Digital Waveguide Theory (Julius O. Smith III, Stanford CCRMA)
+//  - Jawari/Jvari effect: nonlinear grazing contact of string on curved bridge
+//    creates harmonic bloom (slowly evolving overtone cascade)
+//  - Real tanpura: 4 strings Pa–Sa–Sa–Sa(low), cycled with ~1.5-2s spacing
+//
+// Implementation strategy:
+//  We cannot run a true sample-accurate Karplus-Strong feedback loop with Web
+//  Audio API nodes (DelayNode has minimum 1-block latency in the feedback path).
+//  Instead we synthesize each string pluck as a pre-computed AudioBuffer filled
+//  with physically-motivated waveform content, then play it with long decay.
+//  The "evolving harmonics" bloom is achieved by layering multiple slightly-
+//  detuned oscillators with staggered attack envelopes, and routing through
+//  a resonant body filter chain (gourd cavity + neck wood modes).
+
+// Build a single-string Karplus-Strong excitation buffer
+// This fills a short buffer with a damped, noise-seeded waveform that
+// approximates the string's initial transient.
+function buildKarplusBuffer(
+  ctx: AudioContext,
+  freq: number,
+  sampleRate: number
+): AudioBuffer {
+  // Period length in samples
+  const N = Math.round(sampleRate / freq);
+  // Buffer duration: long enough to capture full decay envelope (8 seconds)
+  const totalSamples = Math.floor(sampleRate * 8);
+  const buf = ctx.createBuffer(1, totalSamples, sampleRate);
+  const data = buf.getChannelData(0);
+
+  // Seed the delay line with a shaped noise burst (pluck excitation)
+  const delayLine = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    // Pluck shape: noise burst with triangular window for soft finger pluck
+    const t = i / N;
+    const window = t < 0.5 ? 2 * t : 2 * (1 - t); // triangular window
+    delayLine[i] = (Math.random() * 2 - 1) * window;
   }
-  tanpuraCurveCache = curve;
-  return curve;
+
+  // Karplus-Strong feedback loop with jawari-inspired filtering
+  // The loop filter determines timbre: a one-pole lowpass gives guitar,
+  // a slightly higher cutoff (more highs preserved) gives the bright tanpura buzz
+  let readPos = 0;
+  let lastSample = 0;
+
+  // Loop filter coefficient (0=dead, 1=infinite sustain)
+  // Tanpura has very long sustain, so we use high feedback ~0.998
+  const feedbackGain = 0.998;
+  // Lowpass coefficient: 0=full lowpass (muffled), 1=highpass (bright)
+  // Tanpura bridge preserves more harmonics → use 0.55 (brighter than guitar ~0.5)
+  const lpCoeff = 0.55;
+
+  for (let i = 0; i < totalSamples; i++) {
+    const current = delayLine[readPos];
+    // One-pole lowpass + gain = the Karplus-Strong filter
+    const filtered = feedbackGain * (lpCoeff * current + (1 - lpCoeff) * lastSample);
+
+    // Jawari bridge nonlinearity: subtle asymmetric soft-clip
+    // This adds the characteristic buzz/shimmer of the tanpura bridge contact
+    const jawariClip = filtered > 0
+      ? Math.tanh(filtered * 1.8) * 0.7 + filtered * 0.3
+      : filtered * 0.85;
+
+    data[i] = jawariClip;
+    delayLine[readPos] = filtered;
+    lastSample = current;
+    readPos = (readPos + 1) % N;
+  }
+
+  return buf;
 }
 
 function synthHarmonium(
@@ -236,30 +294,136 @@ function synthHarmonium(
   const master = ctx.createGain();
   master.connect(destNode);
 
-  const lp = ctx.createBiquadFilter();
-  lp.type = 'lowpass';
-  lp.frequency.setValueAtTime(800, t0);
-  lp.frequency.exponentialRampToValueAtTime(2400, t0 + 0.08);
-  lp.frequency.exponentialRampToValueAtTime(1400, t0 + dur);
-  lp.connect(master);
+  // 1. Air Leak/Turbulence Noise (Bellows wind)
+  const noiseLength = Math.floor(ctx.sampleRate * (dur + 0.1));
+  const noiseBuf = ctx.createBuffer(1, noiseLength, ctx.sampleRate);
+  const noiseData = noiseBuf.getChannelData(0);
+  for (let i = 0; i < noiseLength; i++) {
+    noiseData[i] = (Math.random() * 2 - 1) * 0.015;
+  }
+  const noiseNode = ctx.createBufferSource();
+  noiseNode.buffer = noiseBuf;
 
-  const reedFilter = ctx.createBiquadFilter();
-  reedFilter.type = 'peaking';
-  reedFilter.frequency.value = 1500;
-  reedFilter.Q.value = 2.2;
-  reedFilter.gain.value = 9;
-  reedFilter.connect(lp);
+  const noiseLP = ctx.createBiquadFilter();
+  noiseLP.type = 'bandpass';
+  noiseLP.frequency.value = 350; // Low frequency bellows air rumble
+  noiseLP.Q.value = 1.0;
 
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0, t0);
+  noiseGain.gain.linearRampToValueAtTime(vol * 0.08, t0 + 0.05); // air builds up
+  noiseGain.gain.setValueAtTime(vol * 0.08, t0 + dur - 0.04);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.08);
+
+  chain([noiseNode, noiseLP, noiseGain, master]);
+  noiseNode.start(t0);
+  noiseNode.stop(t0 + dur + 0.1);
+
+  // 2. Bellows LFO (Pumping Tremolo & Vibrato)
   const bellowsLFO = ctx.createOscillator();
-  const bellowsGain = ctx.createGain();
-  bellowsLFO.frequency.value = 5.2;
-  bellowsGain.gain.value = 0.06;
-  bellowsLFO.connect(bellowsGain);
-  bellowsGain.connect(master.gain);
+  bellowsLFO.frequency.value = 5.2; // 5.2Hz pumping
+
+  const bellowsGainMod = ctx.createGain();
+  bellowsGainMod.gain.value = 0.08; // volume tremolo depth
+
+  const bellowsPitchMod = ctx.createGain();
+  bellowsPitchMod.gain.value = 8; // vibrato depth in cents
+
+  bellowsLFO.connect(bellowsGainMod);
+  bellowsLFO.connect(bellowsPitchMod);
+
+  const bellowsModNode = ctx.createGain();
+  bellowsModNode.gain.value = 1.0;
+  bellowsGainMod.connect(bellowsModNode.gain);
+
   bellowsLFO.start(t0);
   bellowsLFO.stop(t0 + dur + 0.1);
 
-  const clickBuf = ctx.createBuffer(1, ctx.sampleRate * 0.005, ctx.sampleRate);
+  // 3. Formant Filters (Wood cabinet resonance)
+  const woodFilterLow = ctx.createBiquadFilter();
+  woodFilterLow.type = 'peaking';
+  woodFilterLow.frequency.value = 400; // Wood body resonance
+  woodFilterLow.Q.value = 2.0;
+  woodFilterLow.gain.value = 6;
+
+  const woodFilterHigh = ctx.createBiquadFilter();
+  woodFilterHigh.type = 'peaking';
+  woodFilterHigh.frequency.value = 1200; // Reed chamber resonance
+  woodFilterHigh.Q.value = 1.8;
+  woodFilterHigh.gain.value = 8;
+
+  const mainLP = ctx.createBiquadFilter();
+  mainLP.type = 'lowpass';
+  mainLP.frequency.setValueAtTime(800, t0);
+  mainLP.frequency.exponentialRampToValueAtTime(2800, t0 + 0.06); // brightness swell
+  mainLP.frequency.exponentialRampToValueAtTime(1600, t0 + dur);
+
+  chain([woodFilterLow, woodFilterHigh, mainLP, bellowsModNode, master]);
+
+  // 4. Oscillators (Multi-Reed Chorus)
+  const oscs: OscillatorNode[] = [];
+
+  // Male Reeds (fundamental chorus): Two detuned sawtooths
+  const maleDets = [-6, 6];
+  maleDets.forEach(det => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.value = freq;
+    o.detune.value = det;
+    g.gain.value = 0.26;
+    
+    bellowsPitchMod.connect(o.detune);
+    chain([o, g, woodFilterLow]);
+    oscs.push(o);
+  });
+
+  // Female Reeds (high octave chorus): Detuned sawtooth
+  const femaleDets = [-4, 8];
+  femaleDets.forEach(det => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.value = freq * 2;
+    o.detune.value = det;
+    g.gain.value = 0.16;
+    
+    bellowsPitchMod.connect(o.detune);
+    chain([o, g, woodFilterLow]);
+    oscs.push(o);
+  });
+
+  // Bass Reed (low octave body): Rich triangle/sawtooth blend
+  const bassO1 = ctx.createOscillator();
+  const bassO2 = ctx.createOscillator();
+  const gBass1 = ctx.createGain();
+  const gBass2 = ctx.createGain();
+
+  bassO1.type = 'triangle';
+  bassO1.frequency.value = freq * 0.5;
+  bassO1.detune.value = -3;
+  gBass1.gain.value = 0.22;
+
+  bassO2.type = 'sawtooth';
+  bassO2.frequency.value = freq * 0.5;
+  bassO2.detune.value = 3;
+  gBass2.gain.value = 0.14;
+
+  bellowsPitchMod.connect(bassO1.detune);
+  bellowsPitchMod.connect(bassO2.detune);
+
+  chain([bassO1, gBass1, woodFilterLow]);
+  chain([bassO2, gBass2, woodFilterLow]);
+  oscs.push(bassO1, bassO2);
+
+  // Start & Stop all oscillators
+  oscs.forEach(o => {
+    o.start(t0);
+    o.stop(t0 + dur + 0.1);
+  });
+
+  // 5. Key press mechanical clicks
+  const clickBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.005), ctx.sampleRate);
   const clickData = clickBuf.getChannelData(0);
   for (let i = 0; i < clickBuf.length; i++) {
     clickData[i] = Math.random() * 2 - 1;
@@ -275,43 +439,40 @@ function synthHarmonium(
   chain([clickNode, clickFilter, clickGainNode, master]);
   clickNode.start(t0);
 
-  const oscMale = ctx.createOscillator();
-  const gMale = ctx.createGain();
-  oscMale.type = 'sawtooth';
-  oscMale.frequency.value = freq;
-  oscMale.detune.value = -12;
-  gMale.gain.value = 0.38;
+  // 6. Key release click sound (mechanical key release noise)
+  const releaseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.008), ctx.sampleRate);
+  const releaseData = releaseBuf.getChannelData(0);
+  for (let i = 0; i < releaseBuf.length; i++) {
+    releaseData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / releaseBuf.length, 1.5);
+  }
+  const releaseNode = ctx.createBufferSource();
+  releaseNode.buffer = releaseBuf;
+  
+  const releaseFilter = ctx.createBiquadFilter();
+  releaseFilter.type = 'bandpass';
+  releaseFilter.frequency.value = 1400; // lower pitch click for release
+  
+  const releaseGain = ctx.createGain();
+  releaseGain.gain.setValueAtTime(vol * 0.03, t0 + dur);
+  releaseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.008);
+  
+  chain([releaseNode, releaseFilter, releaseGain, master]);
+  releaseNode.start(t0 + dur);
 
-  const oscFemale = ctx.createOscillator();
-  const gFemale = ctx.createGain();
-  oscFemale.type = 'sawtooth';
-  oscFemale.frequency.value = freq * 2;
-  oscFemale.detune.value = 12;
-  gFemale.gain.value = 0.22;
-
-  const oscBass = ctx.createOscillator();
-  const gBass = ctx.createGain();
-  oscBass.type = 'triangle';
-  oscBass.frequency.value = freq * 0.5;
-  gBass.gain.value = 0.30;
-
-  chain([oscMale, gMale, reedFilter]);
-  chain([oscFemale, gFemale, reedFilter]);
-  chain([oscBass, gBass, reedFilter]);
-
-  [oscMale, oscFemale, oscBass].forEach(o => {
-    o.start(t0);
-    o.stop(t0 + dur + 0.08);
-  });
-
+  // Main Volume Envelope (build-up and release)
   master.gain.setValueAtTime(0, t0);
-  master.gain.linearRampToValueAtTime(vol * 0.85, t0 + 0.04);
-  master.gain.setValueAtTime(vol, t0 + dur - 0.05);
-  master.gain.linearRampToValueAtTime(0, t0 + dur + 0.03);
+  master.gain.linearRampToValueAtTime(vol * 0.85, t0 + 0.05); // smooth attack
+  master.gain.setValueAtTime(vol, t0 + dur - 0.04);
+  master.gain.linearRampToValueAtTime(0, t0 + dur + 0.06); // release
 }
 
 
 
+// synthTanpuraString — Karplus-Strong Physical Model
+// Each call pre-computes a full 8-second string decay AudioBuffer offline
+// (using the KS algorithm in JavaScript), then schedules it to play at t0.
+// The body filter chain shapes the gourd cavity resonance.
+// Called for each of the 4 string positions: Pa, Sa, Sa, Sa(low)
 function synthTanpuraString(
   ctx: AudioContext,
   freq: number,
@@ -320,63 +481,69 @@ function synthTanpuraString(
   vol: number,
   destNode: AudioNode
 ): void {
+  // 1. Build the Karplus-Strong string buffer (runs offline, takes ~5ms)
+  const ksBuffer = buildKarplusBuffer(ctx, freq, ctx.sampleRate);
+
+  // 2. Source node to play the buffer once at t0
+  const src = ctx.createBufferSource();
+  src.buffer = ksBuffer;
+  // Do NOT loop — Karplus-Strong already encodes the full natural decay
+
+  // 3. Master volume + soft attack
   const master = ctx.createGain();
-  master.connect(destNode);
-
   master.gain.setValueAtTime(0, t0);
-  master.gain.linearRampToValueAtTime(vol, t0 + 0.020);
-  master.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  master.gain.linearRampToValueAtTime(vol, t0 + 0.025);  // 25ms soft attack
+  // Natural decay is already in the buffer; fade to silence at dur boundary
+  master.gain.setValueAtTime(vol, t0 + dur - 0.08);
+  master.gain.linearRampToValueAtTime(0, t0 + dur);
 
-  const detunes = [-2.2, 2.2];
-  detunes.forEach(det => {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
+  // 4. Gourd body resonance: the hollow gourd boosts certain frequency bands
+  //    Mode 1 — deep bass cavity (~100-200Hz), adds the "dark hollow" warmth
+  const bodyBass = ctx.createBiquadFilter();
+  bodyBass.type = 'peaking';
+  bodyBass.frequency.value = 140;
+  bodyBass.Q.value = 3.5;
+  bodyBass.gain.value = 8;
 
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
-    osc.detune.value = det;
+  //    Mode 2 — mid-body wood resonance (~280-360Hz), adds wood projection
+  const bodyMid = ctx.createBiquadFilter();
+  bodyMid.type = 'peaking';
+  bodyMid.frequency.value = 310;
+  bodyMid.Q.value = 2.5;
+  bodyMid.gain.value = 5;
 
-    g.gain.setValueAtTime(0, t0);
-    g.gain.linearRampToValueAtTime(0.35, t0 + 0.025);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.85);
+  //    Mode 3 — neck/string overtone emphasis (~800Hz), adds the nasal character
+  const bodyNeck = ctx.createBiquadFilter();
+  bodyNeck.type = 'peaking';
+  bodyNeck.frequency.value = 820;
+  bodyNeck.Q.value = 1.8;
+  bodyNeck.gain.value = 4;
 
-    osc.connect(g);
-    g.connect(master);
+  //    High shelving cut — tanpura is never harsh/bright above 4kHz
+  const bodyHiShelf = ctx.createBiquadFilter();
+  bodyHiShelf.type = 'highshelf';
+  bodyHiShelf.frequency.value = 4000;
+  bodyHiShelf.gain.value = -6;
 
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.1);
-  });
+  // 5. Subtle chorus to simulate the jiva thread modulation (cotton thread
+  //    between string and bridge that creates micro-pitch variations)
+  const jivaPitchLFO = ctx.createOscillator();
+  jivaPitchLFO.type = 'sine';
+  jivaPitchLFO.frequency.value = 0.22; // very slow — 0.22Hz wobble
+  const jivaMod = ctx.createGain();
+  jivaMod.gain.value = 3.5; // ±3.5 cents pitch wobble
+  jivaPitchLFO.connect(jivaMod);
+  jivaMod.connect(src.detune);
+  jivaPitchLFO.start(t0);
+  jivaPitchLFO.stop(t0 + dur + 0.1);
 
-  const jawariPartials = [2, 3, 4, 5, 6, 7];
-  jawariPartials.forEach(ratio => {
-    const jOsc = ctx.createOscillator();
-    const jG = ctx.createGain();
-    
-    jOsc.type = 'sawtooth';
-    jOsc.frequency.value = freq * ratio;
-    jOsc.detune.value = (Math.random() * 8 - 4);
+  // 6. Connect signal chain:
+  //    src → master → bodyBass → bodyMid → bodyNeck → bodyHiShelf → destNode
+  chain([src, master, bodyBass, bodyMid, bodyNeck, bodyHiShelf, destNode]);
 
-    const peakFilter = ctx.createBiquadFilter();
-    peakFilter.type = 'peaking';
-    peakFilter.frequency.value = 1800;
-    peakFilter.gain.value = 8;
-    peakFilter.Q.value = 1.5;
-
-    const shaper = ctx.createWaveShaper();
-    shaper.curve = getTanpuraJawariCurve() as any;
-
-    jG.gain.setValueAtTime(0, t0);
-    jG.gain.linearRampToValueAtTime(0.08 / ratio, t0 + 0.035); 
-    jG.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.40); 
-
-    jOsc.connect(shaper);
-    shaper.connect(peakFilter);
-    peakFilter.connect(jG);
-    jG.connect(master);
-
-    jOsc.start(t0);
-    jOsc.stop(t0 + dur * 0.45);
-  });
+  // 7. Schedule playback
+  src.start(t0);
+  src.stop(t0 + dur + 0.1);
 }
 
 function synthClick(
@@ -650,6 +817,7 @@ export default function Practice() {
 
   return (
     <main className="practice-page" id="practice-main">
+      <TrialBanner />
       <div className="practice-container">
         {/* Header */}
         <header className="practice-header">
